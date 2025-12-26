@@ -1,0 +1,41 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: reviewer-service
+  ai:
+    alibaba:
+      a2a:
+        server:
+          type: JSONRPC
+          address: 127.0.0.1
+          port: 8081
+          message-url: /a2a
+          card:
+            name: reviewer-agent
+            description: 一个专业的文章评审 Agent，可以对文章进行评审和修改
+            url: http://127.0.0.1:8081/a2a
+            documentationUrl: http://example.com/docs/reviewer
+            additional-interfaces:
+              - transport: JSONRPC
+                url: http://127.0.0.1:8081/a2a
+        nacos:
+          discovery:
+            enabled: false
+          registry:
+            enabled: false
+
+app:
+  llm:
+    api-key: ${DEFAULT_LLM_API_KEY:9da16721-41c7-4d52-9876-94bb4171eedf}
+    base-url: ${DEFAULT_LLM_BASE_URL:https://ark.cn-beijing.volces.com}
+    model-name: ${DEFAULT_LLM_MODEL_NAME:deepseek-v3-250324}
+    completions-path: ${DEFAULT_LLM_COMPLETIONS_PATH:/api/v3/chat/completions}
+    embeddings-path: ${DEFAULT_LLM_EMBEDDINGS_PATH:/api/v3/embeddings}
+
+logging:
+  level:
+    root: INFO
+    com.example.reviewer: DEBUG
+

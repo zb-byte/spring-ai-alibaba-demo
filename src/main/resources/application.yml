@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: ai-demo    
+  ai:
+    alibaba:
+      a2a:
+        server:
+          address: ${A2A_SERVER_ADDRESS:127.0.0.1}
+          message-url: ${A2A_MESSAGE_PATH:/a2a}
+          card:
+            name: ${A2A_CARD_NAME:demo-react-agent}
+            description: ${A2A_CARD_DESCRIPTION:一个通过 A2A 暴露的 ReactAgent 示例}
+            url: ${A2A_CARD_URL:http://127.0.0.1:8080/a2a}
+            documentationUrl: http://example.com/docs
+            additional-interfaces:
+              - transport: json-rpc
+                url: ${A2A_CARD_INTERFACE_URL:http://127.0.0.1:8080/a2a}
+        nacos:
+          discovery:
+            enabled: ${A2A_NACOS_DISCOVERY_ENABLED:false}
+          registry:
+            enabled: ${A2A_NACOS_REGISTRY_ENABLED:false}
+
+app:
+  llm:
+    api-key: ${DEFAULT_LLM_API_KEY:9da16721-41c7-4d52-9876-94bb4171eedf}
+    base-url: ${DEFAULT_LLM_BASE_URL:https://ark.cn-beijing.volces.com}
+    model-name: ${DEFAULT_LLM_MODEL_NAME:deepseek-v3-250324}
+    completions-path: ${DEFAULT_LLM_COMPLETIONS_PATH:/api/v3/chat/completions}
+    embeddings-path: ${DEFAULT_LLM_EMBEDDINGS_PATH:/api/v3/embeddings}
+
+logging:
+  level:
+    root: INFO
+    com.example.aidemo: DEBUG
+
