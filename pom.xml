@@ -12,9 +12,9 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>ai-demo</artifactId>
+    <artifactId>spring-ai-alibaba-demo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>ai-demo</name>
+    <name>spring-ai-alibaba-demo</name>
     <description>Spring AI Alibaba demo using Google A2A protocol</description>
 
     <properties>

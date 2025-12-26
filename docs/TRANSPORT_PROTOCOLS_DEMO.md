@@ -13,7 +13,7 @@ Spring AI Alibaba 支持以下三种传输协议：
 ## 项目结构
 
 ```
-ai-demo/
+spring-ai-alibaba-demo/
 ├── src/main/resources/
 │   ├── application.yml                    # 默认配置
 │   ├── application-jsonrpc.yml           # JSON-RPC 协议配置
@@ -48,7 +48,7 @@ spring:
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=jsonrpc
 # 或者
-java -jar target/ai-demo-0.0.1-SNAPSHOT.jar --spring.profiles.active=jsonrpc
+java -jar target/spring-ai-alibaba-demo-0.0.1-SNAPSHOT.jar --spring.profiles.active=jsonrpc
 ```
 
 ### 2. gRPC 协议
@@ -71,7 +71,7 @@ spring:
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=grpc
 # 或者
-java -jar target/ai-demo-0.0.1-SNAPSHOT.jar --spring.profiles.active=grpc
+java -jar target/spring-ai-alibaba-demo-0.0.1-SNAPSHOT.jar --spring.profiles.active=grpc
 ```
 
 ### 3. HTTP+JSON/REST 协议
@@ -94,7 +94,7 @@ spring:
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=rest
 # 或者
-java -jar target/ai-demo-0.0.1-SNAPSHOT.jar --spring.profiles.active=rest
+java -jar target/spring-ai-alibaba-demo-0.0.1-SNAPSHOT.jar --spring.profiles.active=rest
 ```
 
 ## API 端点

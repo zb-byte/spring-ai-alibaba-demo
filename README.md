@@ -1,6 +1,6 @@
 ## 项目简介
 
-本示例将原有的 `ai-demo` 项目改造成 Maven 结构，并基于 **Spring AI Alibaba** 构建了一个简单的 ReactAgent，展示如何使用通用的 OpenAI 兼容模型（如 `deepseek-v3-250324`）进行对话，并额外演示 **Google Agent-to-Agent (A2A)** 协议的服务端与客户端能力。应用同时暴露：
+本示例将原有的 `spring-ai-alibaba-demo` 项目改造成 Maven 结构，并基于 **Spring AI Alibaba** 构建了一个简单的 ReactAgent，展示如何使用通用的 OpenAI 兼容模型（如 `deepseek-v3-250324`）进行对话，并额外演示 **Google Agent-to-Agent (A2A)** 协议的服务端与客户端能力。应用同时暴露：
 
 - `POST /api/chat` 与 `POST /api/chat/a2a`：通过 A2A 协议转发到远端（示例中即自身）ReactAgent。
 - `POST /api/chat/local`：本地直连 LLM 的对比接口。

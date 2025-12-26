@@ -1,6 +1,6 @@
 spring:
   application:
-    name: ai-demo    
+    name: spring-ai-alibaba-demo    
   ai:
     alibaba:
       a2a:

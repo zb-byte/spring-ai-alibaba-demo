@@ -20,7 +20,7 @@ import java.util.Map;
  * - TransportProtocolDemoController: 提供非流式的 HTTP API（等待完整响应后返回）
  * - A2aClientDemo: 提供流式响应的 HTTP API（Server-Sent Events，实时返回数据流）
  * 
- * @author ai-demo
+ * @author spring-ai-alibaba-demo
  */
 @RestController
 @RequestMapping("/demo/streaming")

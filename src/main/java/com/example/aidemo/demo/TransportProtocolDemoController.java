@@ -26,7 +26,7 @@ import java.util.Optional;
  * 
  * 通过配置 spring.ai.alibaba.a2a.server.type 来切换不同的协议类型
  * 
- * @author ai-demo
+ * @author spring-ai-alibaba-demo
  */
 @RestController
 @RequestMapping("/demo/transport")
