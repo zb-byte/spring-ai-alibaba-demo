@@ -1,58 +1,65 @@
 package com.example.writer.web;
 
-import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
-import com.alibaba.cloud.ai.graph.agent.a2a.A2aRemoteAgent;
+import com.example.writer.service.PlannerAgentService;
 import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.messages.Message;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
 public class WriteAndReviewController {
 
-    private final ReactAgent writerAgent;
-    private final A2aRemoteAgent reviewerRemoteAgent;
+    private final ReactAgent plannerAgent;
+    private final PlannerAgentService plannerAgentService;
 
-    public WriteAndReviewController(ReactAgent writerAgent, A2aRemoteAgent reviewerRemoteAgent) {
-        this.writerAgent = writerAgent;
-        this.reviewerRemoteAgent = reviewerRemoteAgent;
+    public WriteAndReviewController(ReactAgent plannerAgent, PlannerAgentService plannerAgentService) {
+        this.plannerAgent = plannerAgent;
+        this.plannerAgentService = plannerAgentService;
     }
 
-    @PostMapping("/write-and-review")
-    public ResponseEntity<Map<String, Object>> writeAndReview(@RequestBody Map<String, String> request) {
-        String topic = request.get("topic");
-        if (topic == null || topic.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "topic 不能为空"));
+    /**
+     * 调用 Planner Agent（调度大脑）的接口
+     * Planner Agent 会：
+     * 1. 发现 Agent - 发现所有可用的 Agent
+     * 2. 理解 Agent 能力 - 理解每个 Agent 能做什么
+     * 3. 选择 & 调用 - 根据需求选择合适的 Agent 并调用
+     */
+    @PostMapping("/planner/invoke")
+    public ResponseEntity<Map<String, Object>> invokePlannerAgent(@RequestBody Map<String, String> request) {
+        String userRequest = request.get("request") != null ? request.get("request") : request.get("topic");
+        if (userRequest == null || userRequest.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "request 或 topic 不能为空"));
         }
 
         try {
-            // 步骤 1: Writer Agent 生成文章
-            String prompt = "请根据以下主题写一篇文章：" + topic;
-            AssistantMessage articleMessage = writerAgent.call(prompt);
-            String originalArticle = articleMessage.getText();
-
-            // 步骤 2: 通过 A2A 协议调用 Reviewer Agent
-            String reviewPrompt = "请对以下文章进行评审和修改：\n\n" + originalArticle;
-            Optional<OverAllState> reviewState = reviewerRemoteAgent.invoke(reviewPrompt);
-            String reviewedArticle = extractArticle(reviewState);
-
+            AssistantMessage message = plannerAgent.call(userRequest);
+            String result = message.getText();
+            
             return ResponseEntity.ok(Map.of(
-                    "topic", topic,
-                    "originalArticle", originalArticle,
-                    "reviewedArticle", reviewedArticle,
-                    "protocol", "A2A (JSON-RPC 2.0)",
-                    "flow", Map.of(
-                            "step1", "Writer Agent 生成文章",
-                            "step2", "通过 A2A 协议调用 Reviewer Service",
-                            "step3", "Reviewer Agent 评审并修改文章",
-                            "step4", "返回最终结果"
-                    )
+                    "request", userRequest,
+                    "result", result,
+                    "agent", "planner-agent",
+                    "description", "Planner Agent 作为调度大脑，自动发现、理解并调用合适的 Agent 完成任务"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * 发现所有可用的 Agent（用于测试）
+     */
+    @GetMapping("/agents/discover")
+    public ResponseEntity<Map<String, Object>> discoverAgents() {
+        try {
+            String agents = plannerAgentService.discoverAgents();
+            return ResponseEntity.ok(Map.of(
+                    "agents", agents,
+                    "description", "Planner Agent 发现的所有可用 Agent"
             ));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
@@ -63,39 +70,6 @@ public class WriteAndReviewController {
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
         return ResponseEntity.ok(Map.of("status", "UP", "service", "writer-service"));
-    }
-
-    @SuppressWarnings("unchecked")
-    private String extractArticle(Optional<OverAllState> state) {
-        if (state.isEmpty()) {
-            return "";
-        }
-
-        OverAllState s = state.get();
-
-        // 尝试从 outputKey "article" 获取
-        if (s.data().containsKey("article")) {
-            Object articleObj = s.data().get("article");
-            if (articleObj instanceof String) {
-                return (String) articleObj;
-            }
-        }
-
-        // 尝试从 messages 获取
-        if (s.data().containsKey("messages")) {
-            Object messagesObj = s.data().get("messages");
-            if (messagesObj instanceof List) {
-                List<Message> messages = (List<Message>) messagesObj;
-                return messages.stream()
-                        .filter(msg -> msg instanceof AssistantMessage)
-                        .map(msg -> (AssistantMessage) msg)
-                        .reduce((first, second) -> second)
-                        .map(AssistantMessage::getText)
-                        .orElse("");
-            }
-        }
-
-        return "";
     }
 }
 
