@@ -20,7 +20,7 @@ reviewer:
 
 app:
   llm:
-    api-key: ${DEFAULT_LLM_API_KEY:}
+    api-key: ${DEFAULT_LLM_API_KEY:62076506-54ad-4472-b155-cb56566c749e}
     base-url: ${DEFAULT_LLM_BASE_URL:https://ark.cn-beijing.volces.com}
     model-name: ${DEFAULT_LLM_MODEL_NAME:deepseek-v3-250324}
     completions-path: ${DEFAULT_LLM_COMPLETIONS_PATH:/api/v3/chat/completions}

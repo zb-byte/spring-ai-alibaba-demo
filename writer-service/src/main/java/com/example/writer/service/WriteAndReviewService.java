@@ -3,6 +3,9 @@ package com.example.writer.service;
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import com.alibaba.cloud.ai.graph.agent.a2a.A2aRemoteAgent;
+
+import ch.qos.logback.core.util.StringUtil;
+
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.beans.factory.ObjectProvider;
@@ -44,10 +47,12 @@ public class WriteAndReviewService {
 
             // 步骤 2: 通过 A2A 协议调用 Reviewer Agent
             A2aRemoteAgent reviewerRemoteAgent = reviewerRemoteAgentProvider.getIfAvailable();
-            if (reviewerRemoteAgent == null) {
+            if (reviewerRemoteAgent == null || StringUtil.isNullOrEmpty(originalArticle)) {
+                System.out.println("Reviewer Service 不可用或原始文章为空");
                 // 如果 Reviewer Service 不可用，返回原始文章
                 return originalArticle;
             }
+            System.out.println("Reviewer Service 可用，开始评审:"+originalArticle);
 
             String reviewPrompt = "请对以下文章进行评审和修改：\n\n" + originalArticle;
             Optional<OverAllState> reviewState = reviewerRemoteAgent.invoke(reviewPrompt);
@@ -60,43 +65,6 @@ public class WriteAndReviewService {
         }
     }
 
-    /**
-     * 主 Agent 的完整工作流程（返回原始文章和评审后的文章）
-     * 
-     * @param topic 文章主题
-     * @return 包含原始文章和评审后文章的 Map
-     */
-    public WriteAndReviewResult writeAndReviewWithDetails(String topic) {
-        try {
-            // 步骤 1: Writer Agent 生成文章
-            String prompt = "请根据以下主题写一篇文章：" + topic;
-            AssistantMessage articleMessage = writerAgent.call(prompt);
-            String originalArticle = articleMessage.getText();
-
-            // 步骤 2: 通过 A2A 协议调用 Reviewer Agent
-            A2aRemoteAgent reviewerRemoteAgent = reviewerRemoteAgentProvider.getIfAvailable();
-            String reviewedArticle = originalArticle;
-            
-            if (reviewerRemoteAgent != null) {
-                String reviewPrompt = "请对以下文章进行评审和修改：\n\n" + originalArticle;
-                Optional<OverAllState> reviewState = reviewerRemoteAgent.invoke(reviewPrompt);
-                String extracted = extractArticle(reviewState);
-                if (!extracted.isEmpty()) {
-                    reviewedArticle = extracted;
-                }
-            }
-
-            return new WriteAndReviewResult(originalArticle, reviewedArticle);
-        } catch (Exception e) {
-            throw new RuntimeException("文章生成或评审失败: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * 写作和评审结果
-     */
-    public record WriteAndReviewResult(String originalArticle, String reviewedArticle) {
-    }
 
     /**
      * 仅调用主 Agent 生成文章（不进行评审）
