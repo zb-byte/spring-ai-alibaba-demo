@@ -1,22 +1,23 @@
 package com.example.writer.config;
 
-import com.alibaba.cloud.ai.graph.agent.ReactAgent;
-import com.alibaba.cloud.ai.graph.agent.a2a.A2aRemoteAgent;
-import com.alibaba.cloud.ai.graph.agent.a2a.AgentCardProvider;
-import com.alibaba.cloud.ai.graph.agent.a2a.RemoteAgentCardProvider;
-import com.alibaba.cloud.ai.graph.checkpoint.savers.MemorySaver;
-import com.alibaba.cloud.ai.graph.exception.GraphStateException;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import com.example.writer.service.AgentRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.util.StringUtils;
+
+import com.alibaba.cloud.ai.graph.agent.ReactAgent;
+import com.alibaba.cloud.ai.graph.agent.a2a.A2aRemoteAgent;
+import com.alibaba.cloud.ai.graph.agent.a2a.AgentCardProvider;
+import com.alibaba.cloud.ai.graph.agent.a2a.RemoteAgentCardProvider;
+import com.alibaba.cloud.ai.graph.checkpoint.savers.MemorySaver;
+import com.alibaba.cloud.ai.graph.exception.GraphStateException;
+import com.example.writer.service.AgentRegistry;
 
 @Configuration
 @EnableConfigurationProperties(LlmProperties.class)
@@ -84,7 +85,7 @@ public class LlmConfiguration {
         return A2aRemoteAgent.builder()
                 .name("reviewer-remote-agent")
                 .description("通过 A2A 协议调用 Reviewer Service，可以对文章进行评审和修改")
-                .instruction("请对文章进行评审和修改，确保文章质量。最终只返回修改后的完整文章，不要包含评审意见。")
+                .instruction("{input}")
                 .agentCardProvider(reviewerAgentCardProvider)
                 .outputKey("article")
                 .build();

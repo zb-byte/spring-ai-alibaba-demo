@@ -1,18 +1,21 @@
 package com.example.writer.service;
 
-import com.alibaba.cloud.ai.graph.OverAllState;
-import com.alibaba.cloud.ai.graph.agent.ReactAgent;
-import com.alibaba.cloud.ai.graph.agent.a2a.A2aRemoteAgent;
-
-import ch.qos.logback.core.util.StringUtil;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import com.alibaba.cloud.ai.graph.GraphResponse;
+import com.alibaba.cloud.ai.graph.NodeOutput;
+import com.alibaba.cloud.ai.graph.OverAllState;
+import com.alibaba.cloud.ai.graph.agent.ReactAgent;
+import com.alibaba.cloud.ai.graph.agent.a2a.A2aRemoteAgent;
+
+import ch.qos.logback.core.util.StringUtil;
+import reactor.core.publisher.Flux;
 
 /**
  * 主 Agent 服务：封装写作和评审的完整流程
@@ -52,7 +55,7 @@ public class WriteAndReviewService {
                 // 如果 Reviewer Service 不可用，返回原始文章
                 return originalArticle;
             }
-            System.out.println("Reviewer Service 可用，开始评审:"+originalArticle);
+            System.out.println("Reviewer Service 可用，开始评审:" + originalArticle);
 
             String reviewPrompt = "请对以下文章进行评审和修改：\n\n" + originalArticle;
             Optional<OverAllState> reviewState = reviewerRemoteAgent.invoke(reviewPrompt);
@@ -90,14 +93,68 @@ public class WriteAndReviewService {
         // 尝试从 outputKey "article" 获取
         if (s.data().containsKey("article")) {
             Object articleObj = s.data().get("article");
-            if (articleObj instanceof String) {
-                return (String) articleObj;
+            
+            // 处理 streaming 模式返回的 Flux
+            if (articleObj instanceof Flux) {
+                Flux<GraphResponse<NodeOutput>> flux = (Flux<GraphResponse<NodeOutput>>) articleObj;
+                StringBuilder result = new StringBuilder();
+                flux.filter(response -> !response.isDone())
+                    .map(response -> {
+                        try {
+                            NodeOutput output = response.getOutput().join();
+                            if (output != null) {
+                                return output.toString();
+                            }
+                            return "";
+                        } catch (Exception e) {
+                            return "";
+                        }
+                    })
+                    .doOnNext(result::append)
+                    .blockLast();
+                return result.toString();
+            }
+            
+            if (articleObj instanceof String article) {
+                // 移除可能的 Agent State 前缀
+                if (article.startsWith("Agent State:")) {
+                    int newlineIndex = article.indexOf('\n');
+                    if (newlineIndex > 0) {
+                        article = article.substring(newlineIndex + 1).trim();
+                    } else {
+                        // 尝试移除 "Agent State: xxx" 格式的前缀
+                        article = article.replaceFirst("^Agent State:\\s*\\w+\\s*", "").trim();
+                    }
+                }
+                return article;
             }
         }
 
         // 尝试从 messages 获取
         if (s.data().containsKey("messages")) {
             Object messagesObj = s.data().get("messages");
+            
+            // 处理 streaming 模式返回的 Flux
+            if (messagesObj instanceof Flux) {
+                Flux<GraphResponse<NodeOutput>> flux = (Flux<GraphResponse<NodeOutput>>) messagesObj;
+                StringBuilder result = new StringBuilder();
+                flux.filter(response -> !response.isDone())
+                    .map(response -> {
+                        try {
+                            NodeOutput output = response.getOutput().join();
+                            if (output != null) {
+                                return output.toString();
+                            }
+                            return "";
+                        } catch (Exception e) {
+                            return "";
+                        }
+                    })
+                    .doOnNext(result::append)
+                    .blockLast();
+                return result.toString();
+            }
+            
             if (messagesObj instanceof List) {
                 List<Message> messages = (List<Message>) messagesObj;
                 return messages.stream()

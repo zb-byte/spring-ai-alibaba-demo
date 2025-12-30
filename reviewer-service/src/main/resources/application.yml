@@ -17,6 +17,8 @@ spring:
             description: 一个专业的文章评审 Agent，可以对文章进行评审和修改
             url: http://127.0.0.1:8081/a2a
             documentationUrl: http://example.com/docs/reviewer
+            capabilities:
+              streaming: true
             additional-interfaces:
               - transport: JSONRPC
                 url: http://127.0.0.1:8081/a2a
