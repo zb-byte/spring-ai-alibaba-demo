@@ -1,122 +1,330 @@
-## 项目简介
+# Spring AI Alibaba 多 Agent 协作 Demo - 快速开始
 
-本示例将原有的 `spring-ai-alibaba-demo` 项目改造成 Maven 结构，并基于 **Spring AI Alibaba** 构建了一个简单的 ReactAgent，展示如何使用通用的 OpenAI 兼容模型（如 `deepseek-v3-250324`）进行对话，并额外演示 **Google Agent-to-Agent (A2A)** 协议的服务端与客户端能力。应用同时暴露：
+## 📋 项目概述
 
-- `POST /api/chat` 与 `POST /api/chat/a2a`：通过 A2A 协议转发到远端（示例中即自身）ReactAgent。
-- `POST /api/chat/local`：本地直连 LLM 的对比接口。
+本项目演示了如何使用 **Spring AI Alibaba** 构建多 Agent 协作系统，展示了以下核心能力：
 
-常用配置通过以下环境变量传入：
+- ✅ **ReactAgent** - 基于 ReAct 模式的智能 Agent
+- ✅ **A2A 协议** - Google Agent-to-Agent 协议实现
+- ✅ **多 Agent 协作** - Writer Agent、Reviewer Agent、Planner Agent 协同工作
+- ✅ **服务发现** - 通过 A2A 协议发现和调用远程 Agent
 
-- `DEFAULT_LLM_API_KEY`
-- `DEFAULT_LLM_BASE_URL`
-- `DEFAULT_LLM_MODEL_NAME`
+### 服务架构
 
-```bash
-export DEFAULT_LLM_API_KEY="9da16721-41c7-4d52-9876-94bb4171eedf"
-export DEFAULT_LLM_BASE_URL="https://ark.cn-beijing.volces.com"
-export DEFAULT_LLM_MODEL_NAME="deepseek-v3-250324"
+```
+┌─────────────────┐
+│  writer-service │  (端口 8080)
+│                 │
+│  ┌───────────┐  │
+│  │ Writer    │  │  - 文章写作 Agent
+│  │ Agent     │  │
+│  └───────────┘  │
+│                 │
+│  ┌───────────┐  │
+│  │ Planner   │  │  - 调度大脑，自动发现和调用其他 Agent
+│  │ Agent     │  │
+│  └───────────┘  │
+│        │        │
+│        │ A2A    │
+│        ▼        │
+└────────┼────────┘
+         │
+         │ HTTP
+         │
+┌────────▼────────┐
+│ reviewer-service│  (端口 8081)
+│                 │
+│  ┌───────────┐  │
+│  │ Reviewer  │  │  - 文章评审 Agent (A2A Server)
+│  │ Agent     │  │
+│  └───────────┘  │
+└─────────────────┘
 ```
 
-示例默认模型名称为 `deepseek-v3-250324`，可根据环境变量覆盖。若后端服务路径不同，可再设置：
+## 🚀 快速开始
 
-```bash
-export DEFAULT_LLM_COMPLETIONS_PATH="/api/v3/chat/completions"
-export DEFAULT_LLM_EMBEDDINGS_PATH="/api/v3/embeddings"
-```
+### 前置条件
 
-## 运行前置条件
-
-- JDK 17+
-- Maven 3.9+
-- 可用的 OpenAI 兼容模型服务端
-- 正确设置环境变量，例如：
-
-```bash
-export DEFAULT_LLM_API_KEY="9da16721-41c7-4d52-9876-94bb4171eedf"
-export DEFAULT_LLM_BASE_URL="https://ark.cn-beijing.volces.com"
-export DEFAULT_LLM_MODEL_NAME="deepseek-v3-250324"
-```
-
-## 启动与体验
-
-```bash
-mvn spring-boot:run
-```
-
-随后可分别调用本地与 A2A 接口：
-
-```bash
-curl -X POST http://localhost:8080/api/chat/local \
-  -H "Content-Type: application/json" \
-  -d '{"question": "介绍一下Spring AI Alibaba"}'
-
-curl -X POST http://localhost:8080/api/chat/a2a \
-  -H "Content-Type: application/json" \
-  -d '{"question": "通过A2A转发这条消息"}'
-```
-
-## 核心实现
-
-- `pom.xml` 引入了 `spring-ai-alibaba-starter-a2a-nacos`，借助其自动配置提供 JSON-RPC 形式的 A2A 服务端路由（`/.well-known/agent.json` 与 `/a2a`）。
-- `LlmConfiguration` 装配 `OpenAiChatModel`、本地 `ReactAgent`（同时作为 A2A 服务端的 Root Agent）以及指向该服务端的 `A2aRemoteAgent` 客户端。
-- `AgentService` 同时封装本地直连与 A2A 远程两种调用路径，便于对比。
-- `ChatController` 暴露 `/api/chat/local` 与 `/api/chat/a2a` 两个接口，默认 `/api/chat` 也会走 A2A 通道，帮助快速演示协议链路。
-
-## 谷歌 A2A 协议（Google Agent-to-Agent）的使用说明
-
-Spring AI Alibaba 已内置对 **A2A (Agent-to-Agent)** 协议的实现，可实现跨服务的智能体互联。本 Demo 已实现一个最小可运行样例：
-
-1. **服务端自动暴露**  
-   引入 `spring-ai-alibaba-starter-a2a-nacos` 后，配置 `spring.ai.alibaba.a2a.server.*` 属性即可让本地 `ReactAgent` 自动挂到 JSON-RPC A2A 服务，生成标准的 `/.well-known/agent.json` 与 `/a2a` 接口。示例默认通过 `A2A_NACOS_DISCOVERY_ENABLED` / `A2A_NACOS_REGISTRY_ENABLED` 环境变量保持关闭，方便单机演示。
-
-2. **客户端远程调用**  
-   `LlmConfiguration` 中额外声明了一个 `A2aRemoteAgent`，直接复用服务端暴露的 `AgentCard`。业务层通过它与服务端 HTTP 通信，实现真正的 A2A 请求/响应链路。
-
-3. **接口对比**  
-   `POST /api/chat/local` 走本地 `ReactAgent`，`POST /api/chat/a2a` 走远程 `A2aRemoteAgent`。响应体会附加 `mode` 字段，方便演示时区分调用路径。
-
-若要接入真实的多 Agent 环境，可将 `spring.ai.alibaba.a2a.nacos.discovery.enabled` / `registry.enabled` 设为 `true` 并配置好 Nacos，或改用其它 `AgentCardProvider` 实现来发现远端 Agent。
-
-## 公网部署 & 运维建议
-
-1. **配置公网信息**  
-   将以下环境变量改成自己的域名 / 路径后再启动应用，A2A `AgentCard` 就会指向公网地址：
-
+1. **JDK 21+**
    ```bash
-   export A2A_SERVER_ADDRESS="agent.example.com"
-   export A2A_MESSAGE_PATH="/a2a"
-   export A2A_CARD_NAME="public-react-agent"
-   export A2A_CARD_DESCRIPTION="A2A Agent running on agent.example.com"
-   export A2A_CARD_URL="https://agent.example.com/a2a"
-   export A2A_CARD_INTERFACE_URL="https://agent.example.com/a2a"
+   java -version  # 确保版本 >= 21
    ```
 
-   启动后访问 `https://agent.example.com/.well-known/agent.json` 即可看到自动生成的 `AgentCard`。
-
-2. **网络与安全**  
-   - 确保防火墙 / 安全组放行对应端口，推荐通过 Nginx/Ingress 等反向代理挂上 HTTPS。  
-   - 若需限制调用方，可在反向代理层加鉴权（Basic Auth、JWT、IP 白名单等），或自定义 `A2aRequestHandler` 检查请求头。  
-   - 默认示例关闭了 Nacos，如需注册中心，将 `A2A_NACOS_DISCOVERY_ENABLED`、`A2A_NACOS_REGISTRY_ENABLED` 置为 `true`，并在 `spring.ai.alibaba.a2a.nacos.*` 下填写 Nacos 连接信息。
-
-3. **客户端接入**  
-   远端服务只需读取你的 `/.well-known/agent.json` 即可获得全部能力描述，示例：
-
+2. **Maven 3.9+**
    ```bash
-   curl https://agent.example.com/.well-known/agent.json | jq .
+   mvn -version
    ```
 
-   或在 Spring AI Alibaba 中配置：
-
-   ```yaml
-   spring:
-     ai:
-       alibaba:
-         a2a:
-           client:
-             card:
-               well-known-url: https://agent.example.com/.well-known/agent.json
+3. **LLM 服务配置**
+   
+   项目默认使用以下配置（可通过环境变量覆盖）：
+   ```bash
+   export DEFAULT_LLM_API_KEY="your-api-key"
+   export DEFAULT_LLM_BASE_URL="https://ark.cn-beijing.volces.com"
+   export DEFAULT_LLM_MODEL_NAME="deepseek-v3-250324"
+   export DEFAULT_LLM_COMPLETIONS_PATH="/api/v3/chat/completions"
+   export DEFAULT_LLM_EMBEDDINGS_PATH="/api/v3/embeddings"
    ```
 
-4. **运维监控**  
-   建议结合现有日志/监控体系（如 Prometheus、SLS）追踪 `/a2a` 请求、响应时间、错误率；也可以对流式输出做限流或计费，满足业务 SLA。
+### 启动步骤
+
+#### 方式一：使用启动脚本（推荐）
+
+1. **启动 Reviewer Service**（必须先启动）
+   ```bash
+   cd spring-ai-alibaba-demo
+   chmod +x scripts/start-reviewer.sh
+   ./scripts/start-reviewer.sh
+   ```
+   
+   等待看到以下日志表示启动成功：
+   ```
+   Started ReviewerApplication in X.XXX seconds
+   ```
+
+2. **启动 Writer Service**（新开一个终端）
+   ```bash
+   cd spring-ai-alibaba-demo
+   chmod +x scripts/start-writer.sh
+   ./scripts/start-writer.sh
+   ```
+
+3. **（可选）启动 Demo Client**
+   ```bash
+   cd demo-client
+   mvn spring-boot:run
+   ```
+
+#### 方式二：手动启动
+
+1. **启动 Reviewer Service**
+   ```bash
+   cd reviewer-service
+   mvn spring-boot:run
+   ```
+   服务将在 `http://localhost:8081` 启动
+
+2. **启动 Writer Service**（新开终端）
+   ```bash
+   cd writer-service
+   mvn spring-boot:run
+   ```
+   服务将在 `http://localhost:8080` 启动
+
+3. **（可选）启动 Demo Client**（新开终端）
+   ```bash
+   cd demo-client
+   mvn spring-boot:run
+   ```
+   服务将在 `http://localhost:8082` 启动
+
+## 🧪 测试示例
+
+### 1. 健康检查
+
+```bash
+# Writer Service
+curl http://localhost:8080/api/health
+
+# Reviewer Service (通过 A2A)
+curl http://localhost:8081/.well-known/agent.json
+```
+
+### 2. 发现所有 Agent
+
+```bash
+curl http://localhost:8080/api/agents/discover
+```
+
+响应示例：
+```json
+{
+  "agents": "Available agents:\n- writer-agent (writer-agent): 一个专业的文章写作 Agent...\n- reviewer-remote-agent (reviewer-remote-agent): 通过 A2A 协议调用...",
+  "description": "Planner Agent 发现的所有可用 Agent"
+}
+```
+
+### 3. 使用 Planner Agent（智能调度）
+
+Planner Agent 会自动分析需求，选择合适的 Agent 并调用：
+
+```bash
+# 请求写文章
+curl -X POST http://localhost:8080/api/planner/invoke \
+  -H "Content-Type: application/json" \
+  -d '{
+    "request": "请写一篇关于人工智能的文章，大约200字"
+  }'
+
+# 请求评审文章
+curl -X POST http://localhost:8080/api/planner/invoke \
+  -H "Content-Type: application/json" \
+  -d '{
+    "request": "请评审并修改这篇文章：人工智能是21世纪最重要的技术之一..."
+  }'
+
+# 请求完整的写作+评审流程
+curl -X POST http://localhost:8080/api/planner/invoke \
+  -H "Content-Type: application/json" \
+  -d '{
+    "request": "请写一篇关于春天的散文，然后进行评审和修改，确保文章质量"
+  }'
+```
+
+### 4. 直接调用 Writer Agent
+
+```bash
+curl -X POST http://localhost:8080/api/writer/write \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic": "人工智能的未来"
+  }'
+```
+
+### 5. 通过 A2A 协议调用 Reviewer Agent
+
+```bash
+# 先获取 Agent Card
+curl http://localhost:8081/.well-known/agent.json
+
+# 通过 A2A 协议调用（需要先写一篇文章）
+curl -X POST http://localhost:8080/api/writer/review \
+  -H "Content-Type: application/json" \
+  -d '{
+    "article": "这是一篇需要评审的文章..."
+  }'
+```
+
+## 📚 核心概念
+
+### 1. ReactAgent
+
+基于 **ReAct (Reasoning + Acting)** 模式的智能 Agent，支持：
+- 推理和行动循环
+- 工具调用
+- 结构化输入/输出
+
+### 2. A2A 协议
+
+**Agent-to-Agent (A2A)** 是 Google 提出的 Agent 间通信协议，支持：
+- 服务发现（通过 `/.well-known/agent.json`）
+- 标准化的消息传递
+- 多种传输协议（JSON-RPC、gRPC、REST）
+
+### 3. Planner Agent（调度大脑）
+
+Planner Agent 是系统的核心调度器，能够：
+- **发现 Agent** - 自动发现所有可用的 Agent
+- **理解能力** - 理解每个 Agent 的功能
+- **智能调度** - 根据用户需求选择合适的 Agent 并调用
+
+## 🔧 配置说明
+
+### Writer Service 配置
+
+`writer-service/src/main/resources/application.yml`:
+
+```yaml
+server:
+  port: 8080
+
+spring:
+  ai:
+    alibaba:
+      a2a:
+        server:
+          enabled: false  # Writer Service 不暴露 A2A 服务
+        nacos:
+          discovery:
+            enabled: false
+          registry:
+            enabled: false
+
+reviewer:
+  agent:
+    url: http://127.0.0.1:8081  # Reviewer Service 地址
+```
+
+### Reviewer Service 配置
+
+`reviewer-service/src/main/resources/application.yml`:
+
+```yaml
+server:
+  port: 8081
+
+spring:
+  ai:
+    alibaba:
+      a2a:
+        server:
+          type: JSONRPC
+          address: 127.0.0.1
+          port: 8081
+          message-url: /a2a
+          card:
+            name: reviewer-agent
+            description: 一个专业的文章评审 Agent
+            url: http://127.0.0.1:8081/a2a
+```
+
+## 🐛 常见问题
+
+### 1. 启动失败：无法连接到 Reviewer Service
+
+**错误信息**：
+```
+java.net.ConnectException: Connection refused
+```
+
+**解决方案**：
+- 确保 Reviewer Service 已先启动
+- 检查端口 8081 是否被占用
+- 确认 `reviewer.agent.url` 配置正确
+
+### 2. Nacos 相关错误
+
+**错误信息**：
+```
+NacosRuntimeException: Request Nacos server version is too low
+```
+
+**解决方案**：
+- 已在配置中禁用 Nacos，如果仍有问题，检查 `application.yml` 中的配置
+
+### 3. LLM API 调用失败
+
+**错误信息**：
+```
+Failed to call LLM API
+```
+
+**解决方案**：
+- 检查环境变量 `DEFAULT_LLM_API_KEY` 是否正确
+- 确认 `DEFAULT_LLM_BASE_URL` 可访问
+- 验证 API Key 是否有足够的权限
+
+### 4. Agent Card 获取失败
+
+**错误信息**：
+```
+Failed to obtain agent card
+```
+
+**解决方案**：
+- 确保 Reviewer Service 已启动
+- 访问 `http://localhost:8081/.well-known/agent.json` 验证服务是否正常
+- 检查网络连接
+
+
+## 💡 提示
+
+- 启动顺序很重要：**必须先启动 Reviewer Service，再启动 Writer Service**
+- Planner Agent 会自动发现所有可用的 Agent，无需手动配置
+- 所有 Agent 共享相同的 LLM 配置，可通过环境变量统一管理
+- 建议使用 `jq` 工具美化 JSON 输出：`curl ... | jq .`
+
+---
+
+**祝使用愉快！如有问题，请查看日志或提交 Issue。**
 

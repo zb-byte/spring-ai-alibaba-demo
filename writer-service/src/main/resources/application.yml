@@ -9,13 +9,18 @@ spring:
       a2a:
         server:
           enabled: false
+        nacos:
+          discovery:
+            enabled: false
+          registry:
+            enabled: false
 reviewer:
   agent:
     url: http://127.0.0.1:8081
 
 app:
   llm:
-    api-key: ${DEFAULT_LLM_API_KEY:9da16721-41c7-4d52-9876-94bb4171eedf}
+    api-key: ${DEFAULT_LLM_API_KEY:}
     base-url: ${DEFAULT_LLM_BASE_URL:https://ark.cn-beijing.volces.com}
     model-name: ${DEFAULT_LLM_MODEL_NAME:deepseek-v3-250324}
     completions-path: ${DEFAULT_LLM_COMPLETIONS_PATH:/api/v3/chat/completions}

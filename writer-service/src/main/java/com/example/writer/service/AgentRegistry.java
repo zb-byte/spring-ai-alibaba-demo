@@ -2,8 +2,13 @@ package com.example.writer.service;
 
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import com.alibaba.cloud.ai.graph.agent.a2a.A2aRemoteAgent;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -12,11 +17,23 @@ import java.util.stream.Collectors;
  * 提供 Agent 发现、能力查询和选择功能
  */
 @Service
-public class AgentRegistry {
+public class AgentRegistry implements ApplicationContextAware {
 
+    private ApplicationContext applicationContext;
+    
     private final Map<String, AgentInfo> agents = new HashMap<>();
 
-    public AgentRegistry(ReactAgent writerAgent, A2aRemoteAgent reviewerRemoteAgent) {
+    @Override
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
+    @PostConstruct
+    public void init() {
+        // 延迟获取 Bean，避免循环依赖
+        ReactAgent writerAgent = applicationContext.getBean("writerAgent", ReactAgent.class);
+        A2aRemoteAgent reviewerRemoteAgent = applicationContext.getBean("reviewerRemoteAgent", A2aRemoteAgent.class);
+        
         // 注册 Writer Agent
         registerAgent("writer-agent", "writer-agent", 
                 "一个专业的文章写作 Agent，可以根据主题生成文章", writerAgent, null);
