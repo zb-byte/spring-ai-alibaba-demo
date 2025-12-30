@@ -130,23 +130,7 @@ curl http://localhost:8080/api/health
 curl http://localhost:8081/.well-known/agent.json
 ```
 
-### 2. 发现所有 Agent
-
-**注意**：此接口当前实现可能存在依赖注入问题，建议暂时不使用。
-
-```bash
-curl http://localhost:8080/api/agents/discover
-```
-
-预期响应示例：
-```json
-{
-  "agents": "Available agents:\n- writer-agent (writer-agent): 一个专业的文章写作 Agent...\n- reviewer-remote-agent (reviewer-remote-agent): 通过 A2A 协议调用...",
-  "description": "Planner Agent 发现的所有可用 Agent"
-}
-```
-
-### 3. 使用写作和评审服务（完整流程）
+### 2. 使用写作和评审服务（完整流程）
 
 `/api/planner/invoke` 接口提供完整的写作+评审流程：
 1. 首先使用 Writer Agent 根据主题生成文章
