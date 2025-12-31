@@ -1,51 +1,39 @@
 #!/bin/bash
 
-echo "=== A2A gRPC Client Demo 测试脚本 ==="
-echo ""
+# A2A gRPC Client 测试脚本
+# 用于测试客户端与服务器的连接和消息发送
 
-# 检查客户端是否运行
-echo "🔍 检查客户端状态..."
-if curl -s http://localhost:7001/api/test-connection > /dev/null; then
-    echo "✅ 客户端正在运行"
-else
-    echo "❌ 客户端未运行，请先启动: ./start-client.sh"
-    exit 1
-fi
-echo ""
+echo "=========================================="
+echo "A2A gRPC Client 测试"
+echo "=========================================="
 
-# 测试连接
-echo "🔗 测试服务器连接..."
-curl -s http://localhost:7001/api/test-connection | jq '.' || echo "连接测试完成"
-echo ""
+CLIENT_URL="http://localhost:7001"
 
-# 测试 Agent Card 获取 (HTTP)
-echo "📄 测试 Agent Card 获取 (HTTP)..."
-curl -s http://localhost:7001/api/agent-card | jq '.' || echo "Agent Card 获取完成"
 echo ""
+echo "1. 测试 HTTP 连接..."
+curl -s "$CLIENT_URL/api/test-connection" | jq .
 
-# 测试 Agent Card 获取 (A2A SDK)
-echo "🚀 测试 Agent Card 获取 (A2A SDK)..."
-curl -s http://localhost:7001/api/agent-card-a2a | jq '.' || echo "A2A Agent Card 获取完成"
 echo ""
+echo "2. 测试 gRPC 连接..."
+curl -s "$CLIENT_URL/api/test-grpc" | jq .
 
-# 测试消息发送 (HTTP)
-echo "📤 测试消息发送 (HTTP)..."
-curl -s -X POST http://localhost:7001/api/send-message \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Hello from test script!"}' | jq '.' || echo "HTTP 消息发送完成"
 echo ""
+echo "3. 初始化 A2A 客户端..."
+curl -s -X POST "$CLIENT_URL/api/init-client" | jq .
 
-# 测试消息发送 (A2A SDK)
-echo "🚀 测试消息发送 (A2A SDK)..."
-curl -s "http://localhost:7001/api/send-message-a2a?message=Hello%20from%20A2A%20SDK!" | jq '.' || echo "A2A 消息发送完成"
 echo ""
+echo "4. 获取 Agent Card (HTTP)..."
+curl -s "$CLIENT_URL/api/agent-card" | jq .
 
-# 测试 gRPC 连接
-echo "🔌 测试 gRPC 连接..."
-curl -s http://localhost:7001/api/test-grpc | jq '.' || echo "gRPC 连接测试完成"
 echo ""
+echo "5. 获取 Agent Card (gRPC)..."
+curl -s "$CLIENT_URL/api/agent-card-a2a" | jq .
 
-echo "✅ 所有测试完成！"
 echo ""
-echo "📱 Web 界面: http://localhost:7001/"
-echo "🔗 API 文档: 见 README.md"
+echo "6. 发送测试消息 (gRPC)..."
+curl -s "$CLIENT_URL/api/send-message-a2a?message=Hello%20A2A%20Agent" | jq .
+
+echo ""
+echo "=========================================="
+echo "测试完成"
+echo "=========================================="

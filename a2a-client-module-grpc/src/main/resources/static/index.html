@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>A2A Client Demo</title>
+    <title>A2A gRPC Client Demo</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
         .container { max-width: 1000px; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -17,83 +17,109 @@
         .btn-success:hover { background: #1e7e34; }
         .btn-warning { background: #ffc107; color: #212529; }
         .btn-warning:hover { background: #e0a800; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
         .form-group { margin: 15px 0; }
-        .form-control { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-        .response-area { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; min-height: 100px; white-space: pre-wrap; font-family: monospace; }
+        .form-control { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .response-area { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; min-height: 100px; white-space: pre-wrap; font-family: monospace; overflow-x: auto; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+        .loading { opacity: 0.6; pointer-events: none; }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        h1 { color: #333; }
+        h2 { color: #555; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; }
+        .badge-success { background: #28a745; color: white; }
+        .badge-warning { background: #ffc107; color: #212529; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🤖 A2A gRPC Client Demo</h1>
-        <p>基于 A2A Java SDK v0.3.3.Final 的客户端测试工具</p>
+        <h1>🤖 A2A gRPC Client Demo <span class="badge badge-success">v0.3.3.Final</span></h1>
+        <p>基于 A2A Java SDK v0.3.3.Final 的真实 gRPC 客户端测试工具</p>
         
         <div class="grid">
             <div>
-                <h2>📡 服务器连接测试</h2>
+                <h2>📡 服务器连接</h2>
                 <div class="endpoint">
-                    <strong>目标服务器:</strong><br>
-                    <span class="code">http://localhost:7002</span><br>
-                    <strong>gRPC 端口:</strong> <span class="code">9090</span>
+                    <strong>HTTP 服务器:</strong> <span class="code">http://localhost:7002</span><br>
+                    <strong>gRPC 端口:</strong> <span class="code">9090</span><br>
+                    <strong>Agent Card:</strong> <span class="code">/.well-known/agent-card.json</span>
                 </div>
                 
-                <button class="btn" onclick="testConnection()">🔍 测试连接</button>
-                <button class="btn btn-success" onclick="getAgentCard()">📄 获取 Agent Card (HTTP)</button>
-                <button class="btn btn-warning" onclick="getAgentCardA2A()">🚀 获取 Agent Card (A2A SDK)</button>
+                <button class="btn" onclick="testConnection()">🔍 测试 HTTP 连接</button>
+                <button class="btn btn-warning" onclick="testGrpcConnection()">🔌 测试 gRPC 连接</button>
+                <button class="btn btn-success" onclick="initClient()">🚀 初始化客户端</button>
                 
                 <div id="connectionStatus" class="response-area">点击上方按钮测试连接...</div>
             </div>
             
             <div>
-                <h2>💬 消息测试</h2>
-                <div class="form-group">
-                    <label>测试消息:</label>
-                    <input type="text" id="testMessage" class="form-control" value="Hello, A2A Echo Agent!" placeholder="输入要发送的消息">
-                </div>
+                <h2>📄 Agent Card</h2>
+                <p>获取 A2A Agent 的元数据和能力信息</p>
                 
-                <button class="btn btn-warning" onclick="sendMessage()">📤 发送消息 (HTTP模拟)</button>
-                <button class="btn btn-success" onclick="sendMessageA2A()">🚀 发送消息 (A2A SDK)</button>
-                <button class="btn" onclick="testGrpcConnection()">🔌 测试 gRPC 连接</button>
+                <button class="btn" onclick="getAgentCard()">📄 HTTP 获取</button>
+                <button class="btn btn-success" onclick="getAgentCardA2A()">🚀 gRPC 获取</button>
                 
-                <div id="messageResponse" class="response-area">消息响应将显示在这里...</div>
+                <div id="agentCardResponse" class="response-area">Agent Card 信息将显示在这里...</div>
             </div>
         </div>
         
-        <h2>🛠️ 开发状态</h2>
+        <h2>💬 消息测试</h2>
+        <div class="form-group">
+            <label><strong>测试消息:</strong></label>
+            <input type="text" id="testMessage" class="form-control" value="Hello, A2A Echo Agent! 你好！" placeholder="输入要发送的消息">
+        </div>
+        
+        <button class="btn btn-success" onclick="sendMessageA2A()">🚀 发送消息 (A2A gRPC)</button>
+        <button class="btn" onclick="sendMessage()">📤 发送消息 (HTTP POST)</button>
+        
+        <div id="messageResponse" class="response-area">消息响应将显示在这里...</div>
+        
+        <h2>✅ 功能状态</h2>
         <ul>
             <li>✅ Maven 依赖配置 (A2A SDK v0.3.3.Final)</li>
             <li>✅ Spring Boot 集成</li>
-            <li>✅ 服务器连接测试</li>
-            <li>✅ Agent Card 获取 (HTTP + A2A SDK)</li>
-            <li>✅ A2A 客户端服务框架</li>
-            <li>✅ 消息发送/接收 (HTTP + A2A SDK 框架)</li>
-            <li>⏳ 完整 gRPC 客户端实现 (待 SDK API 研究)</li>
-            <li>⏳ 流式响应处理 (待开发)</li>
+            <li>✅ gRPC Channel 管理</li>
+            <li>✅ A2A Client 初始化</li>
+            <li>✅ Agent Card 获取 (HTTP + gRPC)</li>
+            <li>✅ 消息发送/接收 (A2A gRPC Client)</li>
+            <li>✅ 事件处理 (MessageEvent, TaskEvent, TaskUpdateEvent)</li>
+            <li>✅ 连接状态管理</li>
         </ul>
         
         <h2>📚 API 端点</h2>
         <div class="endpoint">
-            <strong>连接测试:</strong> <span class="code">GET /api/test-connection</span><br>
+            <strong>HTTP 连接测试:</strong> <span class="code">GET /api/test-connection</span><br>
+            <strong>gRPC 连接测试:</strong> <span class="code">GET /api/test-grpc</span><br>
+            <strong>初始化客户端:</strong> <span class="code">POST /api/init-client</span><br>
             <strong>Agent Card (HTTP):</strong> <span class="code">GET /api/agent-card</span><br>
-            <strong>Agent Card (A2A SDK):</strong> <span class="code">GET /api/agent-card-a2a</span><br>
+            <strong>Agent Card (gRPC):</strong> <span class="code">GET /api/agent-card-a2a</span><br>
             <strong>发送消息 (HTTP):</strong> <span class="code">POST /api/send-message</span><br>
-            <strong>发送消息 (A2A SDK):</strong> <span class="code">GET /api/send-message-a2a?message=xxx</span>
+            <strong>发送消息 (gRPC):</strong> <span class="code">GET /api/send-message-a2a?message=xxx</span>
         </div>
         
         <h2>📖 使用说明</h2>
         <ol>
-            <li>确保 A2A Server 正在运行: <span class="code">cd ../a2a-server-module-grpc && ./start-server.sh</span></li>
-            <li>点击 "测试连接" 验证服务器状态</li>
-            <li>点击 "获取 Agent Card" 查看 Agent 信息</li>
-            <li>输入消息并测试发送功能</li>
+            <li>启动 A2A Server: <span class="code">cd ../a2a-server-module-grpc && mvn spring-boot:run</span></li>
+            <li>启动 A2A Client: <span class="code">cd ../a2a-client-module-grpc && mvn spring-boot:run</span></li>
+            <li>点击 "测试 gRPC 连接" 验证服务器状态</li>
+            <li>点击 "初始化客户端" 建立 gRPC 连接</li>
+            <li>点击 "gRPC 获取" 获取 Agent Card</li>
+            <li>输入消息并点击 "发送消息 (A2A gRPC)" 测试完整流程</li>
         </ol>
     </div>
     
     <script>
+        function showLoading(elementId, message) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = '<span class="spinner"></span>' + message;
+        }
+        
         async function testConnection() {
             const statusDiv = document.getElementById('connectionStatus');
-            statusDiv.textContent = '正在测试连接...';
+            showLoading('connectionStatus', '正在测试 HTTP 连接...');
             
             try {
                 const response = await fetch('/api/test-connection');
@@ -104,36 +130,62 @@
             }
         }
         
-        async function getAgentCard() {
+        async function testGrpcConnection() {
             const statusDiv = document.getElementById('connectionStatus');
-            statusDiv.textContent = '正在获取 Agent Card...';
+            showLoading('connectionStatus', '正在测试 gRPC 连接...');
+            
+            try {
+                const response = await fetch('/api/test-grpc');
+                const result = await response.json();
+                statusDiv.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                statusDiv.textContent = 'gRPC 连接测试失败: ' + error.message;
+            }
+        }
+        
+        async function initClient() {
+            const statusDiv = document.getElementById('connectionStatus');
+            showLoading('connectionStatus', '正在初始化 A2A gRPC 客户端...');
+            
+            try {
+                const response = await fetch('/api/init-client', { method: 'POST' });
+                const result = await response.json();
+                statusDiv.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                statusDiv.textContent = '客户端初始化失败: ' + error.message;
+            }
+        }
+        
+        async function getAgentCard() {
+            const responseDiv = document.getElementById('agentCardResponse');
+            showLoading('agentCardResponse', '正在通过 HTTP 获取 Agent Card...');
             
             try {
                 const response = await fetch('/api/agent-card');
                 const result = await response.json();
-                statusDiv.textContent = JSON.stringify(result, null, 2);
+                responseDiv.textContent = JSON.stringify(result, null, 2);
             } catch (error) {
-                statusDiv.textContent = 'Agent Card 获取失败: ' + error.message;
+                responseDiv.textContent = 'Agent Card 获取失败: ' + error.message;
             }
         }
         
         async function getAgentCardA2A() {
-            const statusDiv = document.getElementById('connectionStatus');
-            statusDiv.textContent = '正在通过 A2A SDK 获取 Agent Card...';
+            const responseDiv = document.getElementById('agentCardResponse');
+            showLoading('agentCardResponse', '正在通过 A2A gRPC 获取 Agent Card...');
             
             try {
                 const response = await fetch('/api/agent-card-a2a');
                 const result = await response.json();
-                statusDiv.textContent = JSON.stringify(result, null, 2);
+                responseDiv.textContent = JSON.stringify(result, null, 2);
             } catch (error) {
-                statusDiv.textContent = 'A2A Agent Card 获取失败: ' + error.message;
+                responseDiv.textContent = 'A2A Agent Card 获取失败: ' + error.message;
             }
         }
         
         async function sendMessage() {
             const message = document.getElementById('testMessage').value;
             const responseDiv = document.getElementById('messageResponse');
-            responseDiv.textContent = '正在发送消息...';
+            showLoading('messageResponse', '正在通过 HTTP 发送消息...');
             
             try {
                 const response = await fetch('/api/send-message', {
@@ -151,7 +203,7 @@
         async function sendMessageA2A() {
             const message = document.getElementById('testMessage').value;
             const responseDiv = document.getElementById('messageResponse');
-            responseDiv.textContent = '正在通过 A2A SDK 发送消息...';
+            showLoading('messageResponse', '正在通过 A2A gRPC 发送消息...');
             
             try {
                 const response = await fetch('/api/send-message-a2a?message=' + encodeURIComponent(message));
@@ -159,19 +211,6 @@
                 responseDiv.textContent = JSON.stringify(result, null, 2);
             } catch (error) {
                 responseDiv.textContent = 'A2A 消息发送失败: ' + error.message;
-            }
-        }
-        
-        async function testGrpcConnection() {
-            const responseDiv = document.getElementById('messageResponse');
-            responseDiv.textContent = '正在测试 gRPC 连接...';
-            
-            try {
-                const response = await fetch('/api/test-grpc');
-                const result = await response.json();
-                responseDiv.textContent = JSON.stringify(result, null, 2);
-            } catch (error) {
-                responseDiv.textContent = 'gRPC 连接测试失败: ' + error.message;
             }
         }
     </script>
