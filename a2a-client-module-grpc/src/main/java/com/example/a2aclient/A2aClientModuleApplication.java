@@ -4,8 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Application class for a2a-client-module-grpc
- * This module uses a2a-java-sdk-client 0.3.3.Final with gRPC transport
+ * A2A gRPC Client Demo Application
+ * 
+ * 基于 A2A Java SDK v0.3.3.Final 构建的 gRPC Client
+ * 用于连接和测试 A2A Echo Agent Server
  */
 @SpringBootApplication
 public class A2aClientModuleApplication {

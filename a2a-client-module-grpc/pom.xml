@@ -12,7 +12,7 @@
 
     <artifactId>a2a-client-module-grpc</artifactId>
     <name>a2a-client-module-grpc</name>
-    <description>Module using a2a-java-sdk-client 0.3.3.Final with gRPC transport</description>
+    <description>A2A gRPC Client Demo using a2a-java-sdk v0.3.3.Final</description>
 
     <properties>
         <io.a2a.sdk.version>0.3.3.Final</io.a2a.sdk.version>
@@ -20,11 +20,19 @@
     </properties>
 
     <dependencies>
+        <!-- Spring Boot Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- Spring Boot Web Starter for REST endpoints -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- A2A SDK Client Dependencies -->
         <dependency>
             <groupId>io.github.a2asdk</groupId>
             <artifactId>a2a-java-sdk-client</artifactId>
@@ -37,6 +45,25 @@
             <version>${io.a2a.sdk.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.github.a2asdk</groupId>
+            <artifactId>a2a-java-sdk-spec</artifactId>
+            <version>${io.a2a.sdk.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.a2asdk</groupId>
+            <artifactId>a2a-java-sdk-spec-grpc</artifactId>
+            <version>${io.a2a.sdk.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.a2asdk</groupId>
+            <artifactId>a2a-java-sdk-http-client</artifactId>
+            <version>${io.a2a.sdk.version}</version>
+        </dependency>
+
+        <!-- gRPC Dependencies -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
@@ -55,6 +82,14 @@
             <version>${grpc.version}</version>
         </dependency>
 
+        <!-- Protobuf -->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.25.3</version>
+        </dependency>
+
+        <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

@@ -1,20 +1,34 @@
 server:
   port: 7002
 
+spring:
+  application:
+    name: a2a-grpc-server
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:sk-demo}
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:gpt-3.5-turbo}
+          temperature: 0.7
+
+# gRPC Server Configuration
 grpc:
   server:
     port: 9090
-    host: localhost
 
-spring:
-  application:
-    name: a2a-echo-agent
+# Agent Configuration
+agent:
+  name: Spring AI Echo Agent
+  description: A Spring AI powered A2A Agent that can chat and echo messages
 
+# Logging
 logging:
   level:
     root: INFO
     com.example.a2aserver: DEBUG
     io.a2a: DEBUG
+    io.grpc: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-

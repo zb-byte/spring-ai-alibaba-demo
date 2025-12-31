@@ -3,10 +3,21 @@ server:
 
 spring:
   application:
-    name: a2a-client-module-grpc
+    name: a2a-client-demo
+
+# A2A Server Configuration
+a2a:
+  server:
+    host: localhost
+    port: 7002
+    grpc-port: 9090
+    agent-card-url: "http://localhost:7002/.well-known/agent-card.json"
 
 logging:
   level:
     root: INFO
     com.example.a2aclient: DEBUG
+    io.a2a: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 

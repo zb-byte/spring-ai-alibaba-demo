@@ -5,18 +5,23 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.example</groupId>
-        <artifactId>spring-ai-alibaba-demo</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.1</version>
+        <relativePath/>
     </parent>
 
+    <groupId>com.example</groupId>
     <artifactId>a2a-server-module-grpc</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
     <name>a2a-server-module-grpc</name>
-    <description>A2A gRPC Server Demo using a2a-java-sdk v0.3.3.Final</description>
+    <description>A2A gRPC Server Demo with Spring AI Agent</description>
 
     <properties>
+        <java.version>21</java.version>
         <io.a2a.sdk.version>0.3.3.Final</io.a2a.sdk.version>
         <grpc.version>1.64.0</grpc.version>
+        <spring-ai.version>1.0.0-M4</spring-ai.version>
     </properties>
 
     <dependencies>
@@ -24,6 +29,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Spring AI - OpenAI (可替换为其他模型) -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+            <version>${spring-ai.version}</version>
         </dependency>
 
         <!-- A2A SDK Core Dependencies -->
@@ -57,7 +69,7 @@
             <version>${io.a2a.sdk.version}</version>
         </dependency>
 
-        <!-- Jakarta Annotations for @PostConstruct and @PreDestroy -->
+        <!-- Jakarta Annotations -->
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
@@ -108,6 +120,17 @@
         </dependency>
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <build>
         <plugins>
             <plugin>
@@ -117,4 +140,3 @@
         </plugins>
     </build>
 </project>
-
