@@ -1,0 +1,12 @@
+server:
+  port: 7001
+
+spring:
+  application:
+    name: a2a-client-module-grpc
+
+logging:
+  level:
+    root: INFO
+    com.example.a2aclient: DEBUG
+

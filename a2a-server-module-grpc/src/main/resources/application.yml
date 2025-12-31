@@ -1,0 +1,20 @@
+server:
+  port: 7002
+
+grpc:
+  server:
+    port: 9090
+    host: localhost
+
+spring:
+  application:
+    name: a2a-echo-agent
+
+logging:
+  level:
+    root: INFO
+    com.example.a2aserver: DEBUG
+    io.a2a: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
