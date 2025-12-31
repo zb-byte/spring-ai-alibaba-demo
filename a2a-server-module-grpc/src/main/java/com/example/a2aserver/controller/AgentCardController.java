@@ -68,12 +68,13 @@ public class AgentCardController {
         """.formatted(agentCard.name(), agentCard.description(), grpcPort);
     }
 
-    @GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
+    @GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE + ";charset=UTF-8")
     public String getIndex() {
         return """
         <!DOCTYPE html>
         <html>
         <head>
+            <meta charset="UTF-8">
             <title>A2A Spring AI Agent</title>
             <style>
                 body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
