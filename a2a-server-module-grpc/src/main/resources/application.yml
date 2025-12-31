@@ -6,11 +6,11 @@ spring:
     name: a2a-grpc-server
   ai:
     openai:
-      api-key: ${OPENAI_API_KEY:sk-demo}
-      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      api-key: ${OPENAI_API_KEY:62076506-54ad-4472-b155-cb56566c749e}
+      base-url: ${OPENAI_BASE_URL:https://ark.cn-beijing.volces.com}
       chat:
         options:
-          model: ${OPENAI_MODEL:gpt-3.5-turbo}
+          model: ${OPENAI_MODEL:deepseek-v3-250324}
           temperature: 0.7
 
 # gRPC Server Configuration

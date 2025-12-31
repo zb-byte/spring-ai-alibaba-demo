@@ -1,35 +1,39 @@
 #!/bin/bash
 
-echo "=== A2A gRPC Client Demo 启动脚本 ==="
-echo "基于 A2A Java SDK v0.3.3.Final"
-echo ""
+# A2A gRPC Client 启动脚本
 
-# 检查 Java 版本
-echo "🔍 检查 Java 环境..."
-java -version
-echo ""
+echo "Starting A2A gRPC Client..."
 
-# 检查 Maven 版本
-echo "🔍 检查 Maven 环境..."
-mvn -version
-echo ""
-
-# 编译项目
-echo "🔨 编译项目..."
-mvn clean compile
-if [ $? -ne 0 ]; then
-    echo "❌ 编译失败，请检查代码"
+# 检查 Java 环境
+if ! command -v java &> /dev/null; then
+    echo "Error: Java is not installed or not in PATH"
     exit 1
 fi
-echo ""
 
-# 启动应用
-echo "🚀 启动 A2A gRPC Client Demo..."
-echo "📱 Web 界面: http://localhost:7001/"
-echo "🔗 API 端点: http://localhost:7001/api/"
-echo ""
-echo "💡 确保 A2A Server 正在运行:"
-echo "   cd ../a2a-server-module-grpc && ./start-server.sh"
-echo ""
+# 检查 Maven 环境 (支持 mvnd 或 mvn)
+if command -v mvnd &> /dev/null; then
+    MVN_CMD="mvnd"
+elif command -v mvn &> /dev/null; then
+    MVN_CMD="mvn"
+else
+    echo "Error: Neither mvnd nor mvn is installed or in PATH"
+    exit 1
+fi
 
-mvn spring-boot:run
+echo "Using Maven command: $MVN_CMD"
+
+# 编译项目
+echo "Building project..."
+$MVN_CMD clean compile -q
+
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to build project"
+    exit 1
+fi
+
+# 启动客户端
+echo "Starting client on HTTP port 7001..."
+echo "Web UI: http://localhost:7001/"
+$MVN_CMD spring-boot:run
+
+echo "Client stopped."

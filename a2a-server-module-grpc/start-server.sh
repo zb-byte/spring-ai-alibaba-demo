@@ -10,15 +10,21 @@ if ! command -v java &> /dev/null; then
     exit 1
 fi
 
-# 检查 Maven 环境
-if ! command -v mvn &> /dev/null; then
-    echo "Error: Maven is not installed or not in PATH"
+# 检查 Maven 环境 (支持 mvnd 或 mvn)
+if command -v mvnd &> /dev/null; then
+    MVN_CMD="mvnd"
+elif command -v mvn &> /dev/null; then
+    MVN_CMD="mvn"
+else
+    echo "Error: Neither mvnd nor mvn is installed or in PATH"
     exit 1
 fi
 
+echo "Using Maven command: $MVN_CMD"
+
 # 编译项目
 echo "Building project..."
-mvn clean compile -q
+$MVN_CMD clean compile -q
 
 if [ $? -ne 0 ]; then
     echo "Error: Failed to build project"
@@ -27,6 +33,6 @@ fi
 
 # 启动服务器
 echo "Starting server on gRPC port 9090 and HTTP port 7002..."
-mvn spring-boot:run
+$MVN_CMD spring-boot:run
 
 echo "Server stopped."
