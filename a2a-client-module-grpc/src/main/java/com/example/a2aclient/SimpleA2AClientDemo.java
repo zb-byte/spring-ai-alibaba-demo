@@ -58,14 +58,6 @@ public class SimpleA2AClientDemo implements CommandLineRunner {
         logger.info("   - a2a-java-sdk-spec (协议规范)");
         logger.info("   - a2a-java-sdk-spec-grpc (gRPC 协议绑定)");
         logger.info("   - a2a-java-sdk-http-client (HTTP 客户端)");
-        logger.info("");
-        logger.info("🚀 下一步开发建议:");
-        logger.info("   1. 研究 A2A Client SDK 0.3.3.Final 的实际 API");
-        logger.info("   2. 实现 AgentCard 获取和解析");
-        logger.info("   3. 配置 gRPC 客户端连接");
-        logger.info("   4. 实现消息发送和接收逻辑");
-        logger.info("   5. 添加 Web 界面进行交互测试");
-        logger.info("");
         logger.info("📚 参考资源:");
         logger.info("   - A2A Protocol: https://a2a-protocol.org/");
         logger.info("   - A2A Java SDK: https://github.com/a2aproject/a2a-java");
