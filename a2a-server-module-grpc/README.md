@@ -20,8 +20,6 @@ src/main/java/com/example/a2aserver/
 │   └── SpringAIAgentExecutor.java            # Spring AI Agent 执行器
 ├── config/
 │   └── AgentCardConfig.java                  # Agent Card 配置
-├── controller/
-│   └── AgentCardController.java              # Agent Card HTTP 端点
 ├── events/
 │   └── SimpleQueueManager.java               # 事件队列管理器
 └── grpc/

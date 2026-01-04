@@ -24,8 +24,7 @@ public class A2aServerModuleApplication {
 
     @Bean
     CommandLineRunner startupInfo(
-            @Value("${server.port:7002}") int httpPort,
-            @Value("${grpc.server.port:9090}") int grpcPort,
+            @Value("${grpc.server.port:9091}") int grpcPort,
             @Value("${agent.name:Spring AI Echo Agent}") String agentName) {
         return args -> {
             logger.info("");
@@ -33,17 +32,7 @@ public class A2aServerModuleApplication {
             logger.info("║           A2A gRPC Server with Spring AI                     ║");
             logger.info("╠══════════════════════════════════════════════════════════════╣");
             logger.info("║  Agent Name: {}", padRight(agentName, 47) + "║");
-            logger.info("║  HTTP Port:  {}", padRight(String.valueOf(httpPort), 47) + "║");
             logger.info("║  gRPC Port:  {}", padRight(String.valueOf(grpcPort), 47) + "║");
-            logger.info("╠══════════════════════════════════════════════════════════════╣");
-            logger.info("║  Endpoints:                                                  ║");
-            logger.info("║    - Web UI:     http://localhost:{}/", padRight(String.valueOf(httpPort), 36) + "║");
-            logger.info("║    - Agent Card: http://localhost:{}/.well-known/agent-card.json ║", httpPort);
-            logger.info("║    - gRPC:       grpc://localhost:{}", padRight(String.valueOf(grpcPort), 36) + "║");
-            logger.info("╠══════════════════════════════════════════════════════════════╣");
-            logger.info("║  Capabilities:                                               ║");
-            logger.info("║    ✅ Streaming          ✅ State History                    ║");
-            logger.info("║    ❌ Push Notifications                                     ║");
             logger.info("╚══════════════════════════════════════════════════════════════╝");
             logger.info("");
         };

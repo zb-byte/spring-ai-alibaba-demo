@@ -56,7 +56,7 @@ public class A2AGrpcService extends A2AServiceGrpc.A2AServiceImplBase {
     private static final Logger logger = LoggerFactory.getLogger(A2AGrpcService.class);
 
     private final AgentExecutor agentExecutor;
-    private final io.a2a.spec.AgentCard agentCard;
+    private final io.a2a.grpc.AgentCard agentCard;
     private final QueueManager queueManager;
     private final ExecutorService executorService;
 
@@ -64,7 +64,7 @@ public class A2AGrpcService extends A2AServiceGrpc.A2AServiceImplBase {
     private final ConcurrentMap<String, Task> taskStore = new ConcurrentHashMap<>();
 
     public A2AGrpcService(AgentExecutor agentExecutor, 
-                          io.a2a.spec.AgentCard agentCard,
+                          io.a2a.grpc.AgentCard agentCard,
                           QueueManager queueManager) {
         this.agentExecutor = agentExecutor;
         this.agentCard = agentCard;
@@ -157,7 +157,7 @@ public class A2AGrpcService extends A2AServiceGrpc.A2AServiceImplBase {
                                      StreamObserver<StreamResponse> responseObserver) {
         logger.info("Received sendStreamingMessage request");
 
-        if (!agentCard.capabilities().streaming()) {
+        if (!agentCard.getCapabilities().getStreaming()) {
             responseObserver.onError(Status.UNIMPLEMENTED
                     .withDescription("Streaming not supported")
                     .asRuntimeException());
@@ -329,7 +329,7 @@ public class A2AGrpcService extends A2AServiceGrpc.A2AServiceImplBase {
                                 StreamObserver<StreamResponse> responseObserver) {
         logger.info("Received taskSubscription request for name: {}", request.getName());
 
-        if (!agentCard.capabilities().streaming()) {
+        if (!agentCard.getCapabilities().getStreaming()) {
             responseObserver.onError(Status.UNIMPLEMENTED
                     .withDescription("Streaming not supported")
                     .asRuntimeException());
@@ -403,7 +403,7 @@ public class A2AGrpcService extends A2AServiceGrpc.A2AServiceImplBase {
         logger.info("Received getAgentCard request");
 
         try {
-            responseObserver.onNext(ToProto.agentCard(agentCard));
+            responseObserver.onNext(agentCard);
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error processing getAgentCard", e);
