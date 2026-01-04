@@ -24,6 +24,8 @@
         <module>writer-service</module>
         <module>a2a-client-module-grpc</module>
         <module>a2a-server-module-grpc</module>
+        <module>a2a-client-module-rest</module>
+        <module>a2a-server-module-rest</module>
     </modules>
 
     <properties>

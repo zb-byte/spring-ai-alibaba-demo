@@ -1,0 +1,19 @@
+server:
+  port: 7001
+
+spring:
+  application:
+    name: a2a-client-rest-demo
+
+# A2A Server Configuration
+a2a:
+  server:
+    url: http://localhost:7002
+
+logging:
+  level:
+    root: INFO
+    com.example.a2aclient: DEBUG
+    io.a2a: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

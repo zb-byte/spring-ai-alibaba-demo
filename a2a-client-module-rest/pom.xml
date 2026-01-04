@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.1</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.example</groupId>
+    <artifactId>a2a-client-module-rest</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>a2a-client-module-rest</name>
+    <description>A2A HTTP REST Client Demo based on a2a-java-sdk v0.3.3.Final</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <io.a2a.sdk.version>0.3.3.Final</io.a2a.sdk.version>
+    </properties>
+
+    <dependencies>
+        <!-- Spring Boot Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Web Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- A2A SDK Client Dependencies -->
+        <dependency>
+            <groupId>io.github.a2asdk</groupId>
+            <artifactId>a2a-java-sdk-client</artifactId>
+            <version>${io.a2a.sdk.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.a2asdk</groupId>
+            <artifactId>a2a-java-sdk-client-transport-rest</artifactId>
+            <version>${io.a2a.sdk.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.a2asdk</groupId>
+            <artifactId>a2a-java-sdk-spec</artifactId>
+            <version>${io.a2a.sdk.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.a2asdk</groupId>
+            <artifactId>a2a-java-sdk-http-client</artifactId>
+            <version>${io.a2a.sdk.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.a2asdk</groupId>
+            <artifactId>a2a-java-sdk-common</artifactId>
+            <version>${io.a2a.sdk.version}</version>
+        </dependency>
+
+        <!-- Protobuf for JSON serialization -->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <version>3.25.3</version>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,28 @@
+server:
+  port: 7002
+
+spring:
+  application:
+    name: a2a-rest-server
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:62076506-54ad-4472-b155-cb56566c749e}
+      base-url: ${OPENAI_BASE_URL:https://ark.cn-beijing.volces.com}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:deepseek-v3-250324}
+          temperature: 0.7
+
+# Agent Configuration
+agent:
+  name: Spring AI Chat Agent
+  description: A Spring AI powered A2A Agent that can chat with LLM
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.example.a2aserver: DEBUG
+    io.a2a: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
