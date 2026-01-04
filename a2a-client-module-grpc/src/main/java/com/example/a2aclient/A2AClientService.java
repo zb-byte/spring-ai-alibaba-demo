@@ -8,6 +8,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
+import io.a2a.spec.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,15 +22,8 @@ import io.a2a.client.TaskUpdateEvent;
 import io.a2a.client.config.ClientConfig;
 import io.a2a.client.transport.grpc.GrpcTransport;
 import io.a2a.client.transport.grpc.GrpcTransportConfigBuilder;
-import io.a2a.spec.AgentCapabilities;
-import io.a2a.spec.AgentCard;
-import io.a2a.spec.Message;
-import io.a2a.spec.Part;
-import io.a2a.spec.Task;
-import io.a2a.spec.TextPart;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
@@ -86,14 +80,30 @@ public class A2AClientService {
                     .pushNotifications(false)
                     .build();
 
+            // 创建 skills（v0.3.3.Final 要求 skills 不能为 null）
+            AgentSkill defaultSkill = new AgentSkill.Builder()
+                    .id("chat")
+                    .name("Chat")
+                    .description("General chat capability")
+                    .tags(List.of("chat"))
+                    .build();
+
+            // 创建 supportedInterfaces - 这是 SDK 查找 transport 的关键
+            AgentInterface grpcInterface = new AgentInterface(
+                    TransportProtocol.GRPC.asString(),  // "grpc"
+                    "grpc://" + target
+            );
+
             agentCard = new AgentCard.Builder()
                     .name("Echo Agent")
                     .description("A2A Echo Agent Demo")
                     .version("1.0.0")
-                    .url("grpc://" + target)
+                    .url("http://" + serverHost + ":7002")  // HTTP URL for agent card
                     .capabilities(capabilities)
                     .defaultInputModes(Collections.singletonList("text"))
                     .defaultOutputModes(Collections.singletonList("text"))
+                    .skills(List.of(defaultSkill))
+                    .additionalInterfaces(List.of(grpcInterface))  // 关键：设置支持的接口
                     .build();
 
             // 创建 A2A Client

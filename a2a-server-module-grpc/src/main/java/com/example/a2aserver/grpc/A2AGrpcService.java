@@ -1,10 +1,28 @@
 package com.example.a2aserver.grpc;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.google.protobuf.Empty;
+
 import io.a2a.grpc.A2AServiceGrpc;
 import io.a2a.grpc.GetAgentCardRequest;
 import io.a2a.grpc.StreamResponse;
 import io.a2a.grpc.TaskSubscriptionRequest;
+import io.a2a.grpc.utils.ProtoUtils.FromProto;
+import io.a2a.grpc.utils.ProtoUtils.ToProto;
 import io.a2a.server.agentexecution.AgentExecutor;
 import io.a2a.server.agentexecution.RequestContext;
 import io.a2a.server.events.EventQueue;
@@ -26,23 +44,6 @@ import io.a2a.spec.TaskStatus;
 import io.a2a.spec.TaskStatusUpdateEvent;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static io.a2a.grpc.utils.ProtoUtils.FromProto;
-import static io.a2a.grpc.utils.ProtoUtils.ToProto;
 
 /**
  * A2A gRPC 服务实现
@@ -90,16 +91,22 @@ public class A2AGrpcService extends A2AServiceGrpc.A2AServiceImplBase {
             // 创建事件队列
             EventQueue eventQueue = queueManager.createOrTap(taskId);
 
+            // 设置 taskId 和 contextId 到 message 中（如果尚未设置）
+            if (message.getTaskId() == null) {
+                message.setTaskId(taskId);
+            }
+            if (message.getContextId() == null) {
+                message.setContextId(contextId);
+            }
+
             // 异步执行 Agent
             final String finalTaskId = taskId;
             final String finalContextId = contextId;
             CompletableFuture.runAsync(() -> {
                 try {
-                    // 创建请求上下文
+                    // 创建请求上下文 - 不单独设置 taskId/contextId，让 RequestContext 从 message 中获取
                     RequestContext requestContext = new RequestContext.Builder()
                             .setParams(params)
-                            .setTaskId(finalTaskId)
-                            .setContextId(finalContextId)
                             .build();
                     agentExecutor.execute(requestContext, eventQueue);
                 } catch (JSONRPCError e) {
@@ -169,16 +176,22 @@ public class A2AGrpcService extends A2AServiceGrpc.A2AServiceImplBase {
             // 创建事件队列
             EventQueue eventQueue = queueManager.createOrTap(taskId);
 
+            // 设置 taskId 和 contextId 到 message 中（如果尚未设置）
+            if (message.getTaskId() == null) {
+                message.setTaskId(taskId);
+            }
+            if (message.getContextId() == null) {
+                message.setContextId(contextId);
+            }
+
             // 异步执行 Agent
             final String finalTaskId = taskId;
             final String finalContextId = contextId;
             CompletableFuture.runAsync(() -> {
                 try {
-                    // 创建请求上下文
+                    // 创建请求上下文 - 不单独设置 taskId/contextId，让 RequestContext 从 message 中获取
                     RequestContext requestContext = new RequestContext.Builder()
                             .setParams(params)
-                            .setTaskId(finalTaskId)
-                            .setContextId(finalContextId)
                             .build();
                     agentExecutor.execute(requestContext, eventQueue);
                 } catch (JSONRPCError e) {

@@ -21,7 +21,7 @@
         <java.version>21</java.version>
         <io.a2a.sdk.version>0.3.3.Final</io.a2a.sdk.version>
         <grpc.version>1.64.0</grpc.version>
-        <spring-ai.version>1.0.0-M4</spring-ai.version>
+        <spring-ai.version>1.0.0-M6</spring-ai.version>
     </properties>
 
     <dependencies>

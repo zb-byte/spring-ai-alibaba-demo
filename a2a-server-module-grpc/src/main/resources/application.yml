@@ -13,6 +13,15 @@ spring:
           model: ${OPENAI_MODEL:deepseek-v3-250324}
           temperature: 0.7
 
+# LLM Configuration (custom configuration to support custom completions path)
+app:
+  llm:
+    api-key: ${OPENAI_API_KEY:62076506-54ad-4472-b155-cb56566c749e}
+    base-url: ${OPENAI_BASE_URL:https://ark.cn-beijing.volces.com}
+    model-name: ${OPENAI_MODEL:deepseek-v3-250324}
+    completions-path: ${DEFAULT_LLM_COMPLETIONS_PATH:/api/v3/chat/completions}
+    embeddings-path: ${DEFAULT_LLM_EMBEDDINGS_PATH:/api/v3/embeddings}
+
 # gRPC Server Configuration
 grpc:
   server:
