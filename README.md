@@ -68,6 +68,7 @@
 
 ## 📚 传输协议文档
 
-- **JSONRPC 传输协议** - 访问 [writer-service/README.md](writer-service/README.md)
+- **jsonrpc 传输协议** - 访问 [a2a-client-module-jsonrpc/README.md](a2a-client-module-jsonrpc/README.md)
 - **gRPC 传输协议** - 访问 [a2a-client-module-grpc/README.md](a2a-client-module-grpc/README.md)
+- **rest 传输协议** - 访问 [a2a-client-module-rest/README.md](a2a-client-module-rest/README.md)
 
