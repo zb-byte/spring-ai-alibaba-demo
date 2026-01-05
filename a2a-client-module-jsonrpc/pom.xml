@@ -12,7 +12,7 @@
 
     <artifactId>a2a-client-module-jsonrpc</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>writer-service</name>
+    <name>a2a-client-module-jsonrpc</name>
     <description>Writer Service - A2A Client</description>
 
     <dependencies>

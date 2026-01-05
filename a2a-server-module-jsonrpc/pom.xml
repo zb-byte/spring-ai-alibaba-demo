@@ -12,7 +12,7 @@
 
     <artifactId>a2a-server-module-jsonrpc</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>reviewer-service</name>
+    <name>a2a-server-module-jsonrpc</name>
     <description>Reviewer Service - A2A Server</description>
 
     <dependencies>

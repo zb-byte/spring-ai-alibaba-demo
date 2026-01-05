@@ -61,22 +61,28 @@ public class A2ARestClient {
      * 发送消息 (同步)
      */
     public EventKind sendMessage(String text) throws Exception {
-        ensureInitialized();
-        
-        logger.info("Sending message: {}", text);
-        
-        Message message = new Message.Builder()
-                .messageId(UUID.randomUUID().toString())
-                .role(Message.Role.USER)
-                .contextId(UUID.randomUUID().toString())
-                .parts(List.of(new TextPart(text)))
-                .build();
-        
-        MessageSendParams params = new MessageSendParams(message, null, null);
-        
-        EventKind result = transport.sendMessage(params, null);
-        logger.info("Message sent, result type: {}", result.getClass().getSimpleName());
-        return result;
+        try{
+            ensureInitialized();
+
+            logger.info("Sending message: {}", text);
+
+            Message message = new Message.Builder()
+                    .messageId(UUID.randomUUID().toString())
+                    .role(Message.Role.USER)
+                    .contextId(UUID.randomUUID().toString())
+                    .parts(List.of(new TextPart(text)))
+                    .build();
+
+            MessageSendParams params = new MessageSendParams(message, null, null);
+
+            EventKind result = transport.sendMessage(params, null);
+            logger.info("Message sent, result type: {}", result.getClass().getSimpleName());
+            return result;
+        }
+        catch (Exception e) {
+            logger.error("Failed to send message", e);
+            return null;
+        }
     }
 
     /**

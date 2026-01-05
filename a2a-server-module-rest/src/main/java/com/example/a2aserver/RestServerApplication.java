@@ -13,12 +13,12 @@ import org.springframework.context.annotation.Bean;
  * 基于 A2A Java SDK v0.3.3.Final 构建的最小可运行 REST Server
  */
 @SpringBootApplication
-public class A2aServerModuleApplication {
+public class RestServerApplication {
 
-    private static final Logger logger = LoggerFactory.getLogger(A2aServerModuleApplication.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestServerApplication.class);
 
     public static void main(String[] args) {
-        SpringApplication.run(A2aServerModuleApplication.class, args);
+        SpringApplication.run(RestServerApplication.class, args);
     }
 
     @Bean

@@ -58,7 +58,10 @@ public class AgentCardConfig {
                                 .examples(List.of("Translate 'Hello' to Chinese", "把这句话翻译成英文"))
                                 .build()
                 ))
-                .preferredTransport("http+json")
+                .preferredTransport("REST")
+                .additionalInterfaces(List.of(
+                        new io.a2a.spec.AgentInterface("REST", "http://localhost:" + serverPort)
+                ))
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package com.example.a2aclient.controller;
+package com.example.a2aclient.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,71 +29,68 @@ import io.a2a.spec.Part;
 import io.a2a.spec.Task;
 import io.a2a.spec.TextPart;
 
-/**
- * 测试 Controller
- * 提供 REST 端点用于测试 A2A Client (v0.3.3.Final)
- */
-@RestController
-@RequestMapping("/test")
-public class TestController {
+@Service
+public class RestDemo {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestController.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestDemo.class);
     
     private final A2ARestClient a2aClient;
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    public TestController(A2ARestClient a2aClient) {
+    public RestDemo(A2ARestClient a2aClient) {
         this.a2aClient = a2aClient;
     }
 
-    @GetMapping(value = "/agent-card", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Object>> getAgentCard() {
+    public void getAgentCard() {
         try {
             AgentCard card = a2aClient.fetchAgentCard();
-            Map<String, Object> result = new HashMap<>();
-            result.put("name", card.name());
-            result.put("description", card.description());
-            result.put("version", card.version());
-            result.put("url", card.url());
-            result.put("protocolVersion", card.protocolVersion());
-            result.put("capabilities", Map.of(
-                    "streaming", card.capabilities().streaming(),
-                    "pushNotifications", card.capabilities().pushNotifications(),
-                    "stateTransitionHistory", card.capabilities().stateTransitionHistory()
-            ));
-            return ResponseEntity.ok(result);
+            logger.info("get agent card: {}", card);
         } catch (Exception e) {
             logger.error("Failed to fetch agent card", e);
-            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
     }
 
-    @PostMapping(value = "/send", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Object>> sendMessage(@RequestParam String msg) {
+    public void sendMessage(String msg) {
         try {
             logger.info("Test: sending message: {}", msg);
             EventKind result = a2aClient.sendMessage(msg);
-            
             Map<String, Object> response = new HashMap<>();
             if (result instanceof Message message) {
                 response.put("type", "message");
                 response.put("messageId", message.getMessageId());
                 response.put("role", message.getRole().asString());
                 response.put("text", extractText(message));
+                logger.info("Test: received message response - messageId: {}, role: {}, text: {}", 
+                    message.getMessageId(), message.getRole().asString(), extractText(message));
             } else if (result instanceof Task task) {
                 response.put("type", "task");
                 response.put("taskId", task.getId());
                 response.put("status", task.getStatus().state().asString());
+                logger.info("Test: received task response - taskId: {}, status: {}", 
+                    task.getId(), task.getStatus().state().asString());
+                
+                // 如果任务包含 artifacts，打印内容
+                if (task.getArtifacts() != null && !task.getArtifacts().isEmpty()) {
+                    task.getArtifacts().forEach(artifact -> {
+                        if (artifact.parts() != null) {
+                            artifact.parts().forEach(part -> {
+                                if (part instanceof TextPart textPart) {
+                                    logger.info("Test: artifact text: {}", textPart.getText());
+                                }
+                            });
+                        }
+                    });
+                }
             }
-            
-            return ResponseEntity.ok(response);
+            logger.info("Test: sent message completed");
         } catch (Exception e) {
             logger.error("Failed to send message", e);
-            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
     }
 
-    @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    /**
+     * 发送流式消息（用于 REST API，返回 SseEmitter）
+     */
     public SseEmitter sendMessageStreaming(@RequestParam String msg) {
         SseEmitter emitter = new SseEmitter(60000L);
         
@@ -131,7 +129,44 @@ public class TestController {
         return emitter;
     }
 
-    @GetMapping(value = "/task/{taskId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * 发送流式消息（用于命令行测试）
+     */
+    public void sendMessageStreamingForConsole(String msg) {
+        try {
+            logger.info("Test: sending streaming message: {}", msg);
+            StringBuilder fullText = new StringBuilder();
+            String[] taskId = new String[1];
+            
+            a2aClient.sendMessageStreaming(msg, event -> {
+                if (event instanceof Message message) {
+                    String text = extractText(message);
+                    if (!text.isEmpty()) {
+                        fullText.append(text);
+                        // 实时打印流式内容
+                        System.out.print(text);
+                        System.out.flush();
+                    }
+                    logger.debug("Test: received streaming message - messageId: {}, role: {}, text: {}", 
+                        message.getMessageId(), message.getRole().asString(), text);
+                } else if (event instanceof Task task) {
+                    taskId[0] = task.getId();
+                    logger.info("Test: received streaming task - taskId: {}, status: {}", 
+                        task.getId(), task.getStatus().state().asString());
+                    
+                    if (task.getStatus().state() == io.a2a.spec.TaskState.COMPLETED) {
+                        System.out.println(); // 换行
+                        logger.info("Test: streaming completed - full text length: {}", fullText.length());
+                    }
+                }
+            });
+            
+            logger.info("Test: streaming message completed");
+        } catch (Exception e) {
+            logger.error("Failed to send streaming message", e);
+        }
+    }
+
     public ResponseEntity<Map<String, Object>> getTask(@PathVariable String taskId) {
         try {
             Task task = a2aClient.getTask(taskId);
@@ -143,6 +178,34 @@ public class TestController {
         } catch (Exception e) {
             logger.error("Failed to get task", e);
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * 获取任务（用于命令行测试）
+     */
+    public void getTaskForConsole(String taskId) {
+        try {
+            logger.info("Test: getting task: {}", taskId);
+            Task task = a2aClient.getTask(taskId);
+            logger.info("Test: task info - taskId: {}, contextId: {}, status: {}", 
+                task.getId(), task.getContextId(), task.getStatus().state().asString());
+            
+            if (task.getArtifacts() != null && !task.getArtifacts().isEmpty()) {
+                task.getArtifacts().forEach(artifact -> {
+                    logger.info("Test: artifact - name: {}, artifactId: {}", 
+                        artifact.name(), artifact.artifactId());
+                    if (artifact.parts() != null) {
+                        artifact.parts().forEach(part -> {
+                            if (part instanceof TextPart textPart) {
+                                logger.info("Test: artifact text: {}", textPart.getText());
+                            }
+                        });
+                    }
+                });
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get task", e);
         }
     }
 
