@@ -19,9 +19,8 @@
     <description>Spring AI Alibaba demo using Google A2A protocol</description>
 
     <modules>
-        <module>demo-client</module>
-        <module>reviewer-service</module>
-        <module>writer-service</module>
+        <module>a2a-server-module-jsonrpc</module>
+        <module>a2a-client-module-jsonrpc</module>
         <module>a2a-client-module-grpc</module>
         <module>a2a-server-module-grpc</module>
         <module>a2a-client-module-rest</module>
