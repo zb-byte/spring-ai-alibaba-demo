@@ -1,45 +1,10 @@
-# Spring AI Alibaba 多 Agent 协作 Demo - 快速开始
+# A2A Demo - 快速开始
 
 ## 📋 项目概述
+演示 基于Google A2A 协议的三种通信方式：JSONRPC、REST、GRPC。
+其中 JSONRPC模块依赖的是spring-ai-alibaba ，一个基于Google A2A 官方 SDK 和 spring-ai 二次开发的项目。
+REST 和 GRPC 基于Google A2A 官方 SDK。
 
-本项目演示了如何使用 **Spring AI Alibaba** 构建多 Agent 协作系统，展示了以下核心能力：
-
-- ✅ **ReactAgent** - 基于 ReAct 模式的智能 Agent
-- ✅ **A2A 协议** - Google Agent-to-Agent 协议实现
-- ✅ **多 Agent 协作** - Writer Agent、Reviewer Agent、Planner Agent 协同工作
-- ✅ **服务发现** - 通过 A2A 协议发现和调用远程 Agent
-
-### 服务架构
-
-```
-┌─────────────────────────────────────┐
-│  writer-service (端口 8080)          │
-│                                      │
-│  ┌──────────────────────────────┐  │
-│  │ WriteAndReviewService         │  │
-│  │                               │  │
-│  │  1. Writer Agent              │  │  - 文章写作 Agent
-│  │     (生成文章)                 │  │
-│  │                               │  │
-│  │  2. Reviewer Remote Agent     │  │  - 通过 A2A 调用远程 Agent
-│  │     (评审文章)                 │  │
-│  └──────────────────────────────┘  │
-│              │                       │
-│              │ A2A Protocol          │
-│              │ (HTTP/JSON-RPC)        │
-│              ▼                       │
-└──────────────┼───────────────────────┘
-               │
-               │
-┌──────────────▼───────────────────────┐
-│  reviewer-service (端口 8081)          │
-│                                      │
-│  ┌──────────────────────────────┐  │
-│  │ Reviewer Agent                │  │  - 文章评审 Agent
-│  │ (A2A Server)                  │  │  - 暴露 /.well-known/agent.json
-│  └──────────────────────────────┘  │
-└─────────────────────────────────────┘
-```
 
 ## 🚀 快速开始
 
