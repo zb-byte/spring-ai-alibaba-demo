@@ -29,13 +29,16 @@ public class A2ADemoService {
 
     /**
      * A2A 协议，spring-ai-alibaba 默认是 JSONRPC 的方式调用 远程智能体
-     * @return
      */
-    public String a2aDemo() {
+    public void a2aDemo() {
         try {
             String reviewPrompt = "请对以下文章进行评审：人工智能是一场新的工业革命\n\n";
+            System.out.println("=====a2a调用开始=====："+reviewPrompt);
             Optional<OverAllState> reviewState = a2aRemoteAgent.invoke(reviewPrompt);
-            return extractArticle(reviewState);
+            System.out.println("=====a2a调用完成=====："+reviewState);
+            System.out.println("=====a2a响应解析开始=====");
+            String re = extractArticle(reviewState);
+            System.out.println("=====a2a响应解析完成=====：\n\n"+re);
         } catch (Exception e) {
             throw new RuntimeException("文章生成或评审失败: " + e.getMessage(), e);
         }
