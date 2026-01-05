@@ -1,9 +1,9 @@
 # A2A Demo - 快速开始
 
 ## 📋 项目概述
-演示 基于Google A2A 协议的三种通信方式：JSONRPC、REST、GRPC。
-其中 JSONRPC模块依赖的是spring-ai-alibaba ，一个基于Google A2A 官方 SDK 和 spring-ai 二次开发的项目。
-REST 和 GRPC 基于Google A2A 官方 SDK。
+本项目演示的是基于Google A2A 协议的三种通信方式：JSONRPC、REST、GRPC。
+- JSONRPC模块 依赖的是spring-ai-alibaba ，一个基于Google A2A 官方 SDK 和 spring-ai 二次开发的项目。
+- REST和GRPC模块 基于Google A2A 官方 SDK。
 
 
 ## 🚀 快速开始
