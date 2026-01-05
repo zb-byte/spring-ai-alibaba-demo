@@ -3,7 +3,7 @@
 ## 📋 项目概述
 本项目演示的是基于Google A2A 协议的三种通信方式：JSONRPC、REST、GRPC。
 - JSONRPC模块 依赖的是spring-ai-alibaba ，一个基于Google A2A 官方 SDK 和 spring-ai 二次开发的项目。
-- REST和GRPC模块 基于Google A2A 官方 SDK。
+- REST和GRPC模块 基于Google A2A 官方 SDK。spring-ai-alibaba当前 release 版本暂不支持。
 
 
 ## 🚀 快速开始
@@ -31,7 +31,7 @@
    export DEFAULT_LLM_EMBEDDINGS_PATH="/api/v3/embeddings"
    ```
 
-## 📚 传输协议文档
+## 📚 三种传输协议演示说明
 
 - **jsonrpc 传输协议** - 访问 [a2a-client-module-jsonrpc/README.md](a2a-client-module-jsonrpc/README.md)
 - **gRPC 传输协议** - 访问 [a2a-client-module-grpc/README.md](a2a-client-module-grpc/README.md)
