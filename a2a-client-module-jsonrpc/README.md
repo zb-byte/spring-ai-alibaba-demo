@@ -35,7 +35,7 @@ Agent 之间通过 **JSONRPC 2.0 协议** 进行通信，具体流程如下：
 ┌─────────────────────────────────────────────────────────────┐
 │  1. 服务发现阶段                                               │
 │                                                               │
-│  Client (Writer Agent)                                        │
+│  Client                                       │
 │    │                                                          │
 │    │ GET http://127.0.0.1:8081/.well-known/agent.json       │
 │    │                                                          │
@@ -47,7 +47,7 @@ Agent 之间通过 **JSONRPC 2.0 协议** 进行通信，具体流程如下：
 ┌─────────────────────────────────────────────────────────────┐
 │  2. 远程调用阶段                                               │
 │                                                               │
-│  Client (Writer Agent)                                        │
+│  Client                                       │
 │    │                                                          │
 │    │ POST http://127.0.0.1:8081/a2a                          │
 │    │ Content-Type: application/json                          │
@@ -67,7 +67,7 @@ Agent 之间通过 **JSONRPC 2.0 协议** 进行通信，具体流程如下：
 │    │ }                                                        │
 │    │                                                          │
 │    ▼                                                          │
-│  Server (Reviewer Agent)                                      │
+│  Server                                 │
 │    │                                                          │
 │    │ 处理请求 → 执行 Agent 逻辑 → 返回响应                    │
 │    │                                                          │
@@ -86,7 +86,7 @@ Agent 之间通过 **JSONRPC 2.0 协议** 进行通信，具体流程如下：
 
 ### 核心组件说明
 
-#### 1. Client 端 (Writer Agent)
+#### 1. Client 端 
 
 **配置类** (`AgentConfiguration.java`):
 ```java
@@ -123,7 +123,7 @@ public class A2ADemoService {
 }
 ```
 
-#### 2. Server 端 (Reviewer Agent)
+#### 2. Server 端 
 
 **配置文件** (`application.yml`):
 ```yaml
