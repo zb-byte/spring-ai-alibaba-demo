@@ -23,14 +23,16 @@ import io.a2a.grpc.AgentSkill;
 public class GrpcProtocolServer extends AbstractProtocolServer {
 
     private Server grpcServer;
-    private A2AGrpcServiceDelegate grpcServiceDelegate;
+    private final A2AGrpcServiceDelegate grpcServiceDelegate;
 
     public GrpcProtocolServer(A2AAgent<?> agent,
                              ApplicationContext applicationContext,
                              A2AServerProperties properties) {
         super(agent, applicationContext, properties);
         this.port = properties.getGrpcPort();
-        this.grpcServiceDelegate = new A2AGrpcServiceDelegate(agent);
+        // 创建完整的 gRPC AgentCard
+        io.a2a.grpc.AgentCard grpcAgentCard = createGrpcAgentCard();
+        this.grpcServiceDelegate = new A2AGrpcServiceDelegate(agent, grpcAgentCard);
     }
 
     @Override

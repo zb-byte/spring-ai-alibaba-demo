@@ -8,6 +8,7 @@ import java.util.concurrent.Executor;
 
 import com.google.common.collect.Lists;
 import io.a2a.spec.AgentCapabilities;
+import io.a2a.spec.TransportProtocol;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,6 +58,7 @@ public class RestProtocolServer extends AbstractProtocolServer {
                 .description(agent.getDescription())
                 .url(getServerUrl())
                 .version(agent.getVersion())
+                .preferredTransport(TransportProtocol.HTTP_JSON.name())
                 .capabilities(new AgentCapabilities.Builder()
                         .streaming(agent.supportsStreaming())
                         .build())

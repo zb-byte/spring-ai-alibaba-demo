@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import io.a2a.spec.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -15,11 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.a2aserver.sdk.agent.A2AAgent;
 import com.example.a2aserver.sdk.config.A2AServerProperties;
 import com.example.a2aserver.sdk.protocol.ProtocolType;
-
-import io.a2a.spec.AgentCard;
-import io.a2a.spec.AgentCapabilities;
-import io.a2a.spec.AgentSkill;
-import io.a2a.spec.AgentInterface;
 
 import java.util.List;
 
@@ -55,6 +51,7 @@ public class JsonRpcProtocolServer extends AbstractProtocolServer {
                 .description(agent.getDescription())
                 .url(serverUrl)
                 .version(agent.getVersion())
+                .preferredTransport(TransportProtocol.JSONRPC.name())
                 .capabilities(new AgentCapabilities.Builder()
                         .streaming(agent.supportsStreaming())
                         .pushNotifications(false)

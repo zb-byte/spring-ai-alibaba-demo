@@ -18,7 +18,7 @@ import com.example.a2aserver.sdk.server.A2AServerBootstrap;
  * Spring Boot 自动配置，扫描并启动 A2A 服务器
  */
 @AutoConfiguration
-@EnableConfigurationProperties({A2AServerProperties.class, A2AServerPropertiesConfiguration.class})
+@EnableConfigurationProperties(A2AServerPropertiesConfiguration.class)
 @ComponentScan(basePackages = "com.example.a2aserver.sdk")
 public class A2AServerAutoConfiguration {
 
@@ -31,6 +31,8 @@ public class A2AServerAutoConfiguration {
     private ApplicationContext applicationContext;
 
     @Autowired
+    private A2AServerPropertiesConfiguration propertiesConfiguration;
+    
     private A2AServerProperties properties;
 
     /**
@@ -46,6 +48,9 @@ public class A2AServerAutoConfiguration {
             logger.info("To use A2A Server, please implement the A2AAgent interface.");
             return null;
         }
+
+        // 从配置绑定类转换为属性对象
+        properties = propertiesConfiguration.toProperties();
 
         logger.info("Found A2AAgent implementation: {}", agent.getName());
         logger.info("Auto-starting A2A Server with protocols: {}", getEnabledProtocols());
@@ -78,6 +83,9 @@ public class A2AServerAutoConfiguration {
     }
 
     private String getEnabledProtocols() {
+        if (properties == null) {
+            return "Unknown";
+        }
         StringBuilder sb = new StringBuilder();
         if (properties.isRestEnabled()) {
             sb.append("REST ");

@@ -3,14 +3,14 @@ package com.example.a2aserver.sdk.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import com.example.a2aserver.sdk.protocol.ProtocolType;
 
 /**
  * A2A 服务器配置属性
+ * 
+ * 注意：此类不直接绑定配置，配置绑定由 A2AServerPropertiesConfiguration 处理
+ * 此类主要用于程序化构建配置对象
  */
-@ConfigurationProperties(prefix = "a2a.server")
 public class A2AServerProperties {
 
     /**
