@@ -1,0 +1,45 @@
+server:
+  port: 7003
+
+spring:
+  application:
+    name: a2a-complete-server
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:62076506-54ad-4472-b155-cb56566c749e}
+      base-url: ${OPENAI_BASE_URL:https://ark.cn-beijing.volces.com}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:deepseek-v3-250324}
+          temperature: 0.7
+
+# A2A Server SDK Configuration
+a2a:
+  server:
+    auto-start: true
+    rest-enabled: true
+    rest-port: 7003
+    grpc-enabled: true
+    grpc-port: 9092
+    json-rpc-enabled: true
+    json-rpc-port: 7003
+    host: localhost
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.example.a2aserver: DEBUG
+    com.example.a2aserver.sdk: DEBUG
+    io.a2a: DEBUG
+    io.grpc: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+app:
+  llm:
+    api-key: ${DEFAULT_LLM_API_KEY:62076506-54ad-4472-b155-cb56566c749e}
+    base-url: ${DEFAULT_LLM_BASE_URL:https://ark.cn-beijing.volces.com}
+    model-name: ${DEFAULT_LLM_MODEL_NAME:deepseek-v3-250324}
+    completions-path: ${DEFAULT_LLM_COMPLETIONS_PATH:/api/v3/chat/completions}
+    embeddings-path: ${DEFAULT_LLM_EMBEDDINGS_PATH:/api/v3/embeddings}
