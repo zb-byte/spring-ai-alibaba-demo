@@ -3,14 +3,18 @@ package com.example.a2aserver.sdk.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import com.example.a2aserver.sdk.protocol.ProtocolType;
 
 /**
  * A2A 服务器配置属性
  * 
- * 注意：此类不直接绑定配置，配置绑定由 A2AServerPropertiesConfiguration 处理
- * 此类主要用于程序化构建配置对象
+ * 支持两种使用方式：
+ * 1. Spring Boot 配置绑定：使用 @ConfigurationProperties 从 application.yml 自动绑定
+ * 2. 程序化构建：使用 Builder 模式手动构建配置对象
  */
+@ConfigurationProperties(prefix = "a2a.server")
 public class A2AServerProperties {
 
     /**
@@ -47,6 +51,11 @@ public class A2AServerProperties {
      * 服务器主机
      */
     private String host = "localhost";
+
+    /**
+     * 是否自动启动服务器
+     */
+    private boolean autoStart = true;
 
     /**
      * 自定义配置
@@ -117,6 +126,14 @@ public class A2AServerProperties {
         this.customConfig = customConfig;
     }
 
+    public boolean isAutoStart() {
+        return autoStart;
+    }
+
+    public void setAutoStart(boolean autoStart) {
+        this.autoStart = autoStart;
+    }
+
     /**
      * 检查指定协议是否启用
      */
@@ -178,6 +195,11 @@ public class A2AServerProperties {
 
         public Builder host(String host) {
             properties.setHost(host);
+            return this;
+        }
+
+        public Builder autoStart(boolean autoStart) {
+            properties.setAutoStart(autoStart);
             return this;
         }
 

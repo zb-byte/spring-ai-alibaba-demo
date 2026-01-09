@@ -176,18 +176,36 @@ A2AServerBootstrap.builder()
 
 ### REST API
 
-- `GET /.well-known/agent-card.json` - Agent 卡片
-- `POST /v1/message:send` - 发送消息
-- `POST /v1/message:stream` - 流式消息
-- `GET /v1/tasks/{taskId}` - 获取任务
+- `GET /.well-known/agent-card.json` - 获取 Agent 卡片
+- `POST /v1/message:send` - 发送消息（同步）
+- `GET /v1/tasks/{taskId}` - 获取任务状态
 
 ### gRPC API
 
 使用 A2A gRPC 协议，支持所有标准 gRPC 客户端。
 
+**已实现的方法：**
+- `getAgentCard(GetAgentCardRequest)` - 获取 Agent 卡片信息
+- `sendMessage(SendMessageRequest)` - 发送消息并获取响应
+
+**待实现的方法：**
+- `sendStreamingMessage(SendMessageRequest)` - 流式消息
+- `getTask(GetTaskRequest)` - 获取任务状态
+- `cancelTask(CancelTaskRequest)` - 取消任务
+
+**使用示例：**
+```java
+// 使用 gRPC 客户端调用
+A2AServiceBlockingStub stub = A2AServiceGrpc.newBlockingStub(channel);
+AgentCard card = stub.getAgentCard(GetAgentCardRequest.getDefaultInstance());
+SendMessageResponse response = stub.sendMessage(request);
+```
+
 ### JSON-RPC API
 
 - `POST /a2a` - JSON-RPC 端点
+  - `agentCard` - 获取 Agent 卡片
+  - `message.send` - 发送消息
 
 ## 🛠️ 技术栈
 
@@ -218,7 +236,8 @@ a2a-server-module-complete/
 │   └── config/                             # 自动配置
 │       ├── EnableA2AServer.java
 │       ├── A2AServerAutoConfiguration.java
-│       └── A2AServerProperties.java
+│       ├── A2AServerProperties.java
+│       └── A2AServerPropertiesConfiguration.java
 ├── example/                                # 示例代码
 │   └── MyAgent.java
 ├── config/                                 # 旧配置（兼容）
@@ -234,6 +253,32 @@ a2a-server-module-complete/
 3. **错误处理** - 捕获并返回友好的错误信息
 4. **元数据** - 使用元数据传递额外信息
 5. **能力声明** - 准确声明 Agent 能力
+6. **配置管理** - 使用 `A2AServerPropertiesConfiguration` 绑定配置，避免重复绑定
+
+## 🔧 配置说明
+
+### 配置属性绑定
+
+SDK 使用两层配置管理：
+
+1. **A2AServerPropertiesConfiguration** - 从 `application.yml` 绑定配置
+   ```yaml
+   a2a:
+     server:
+       auto-start: true
+       rest-enabled: true
+       grpc-port: 9092
+   ```
+
+2. **A2AServerProperties** - 程序化构建的配置对象
+   ```java
+   A2AServerProperties props = A2AServerProperties.builder()
+       .enableRest(true)
+       .grpcPort(9092)
+       .build();
+   ```
+
+**注意**：只有 `A2AServerPropertiesConfiguration` 使用 `@ConfigurationProperties`，避免重复绑定。
 
 ## 🔍 常见问题
 

@@ -5,9 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import io.a2a.spec.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,13 +21,20 @@ import java.util.List;
  * JSON-RPC 协议服务器实现
  *
  * 简化实现，直接处理 JSON-RPC 请求
+ * 
+ * 注意：此类通过工厂创建，但需要手动注册为 Spring Bean 以便 REST 端点生效
  */
-@Component
 @RestController
 @RequestMapping("/a2a")
 public class JsonRpcProtocolServer extends AbstractProtocolServer {
 
-    @Autowired(required = false)
+    /**
+     * 构造函数
+     * 
+     * @param agent Agent 实例
+     * @param applicationContext Spring 应用上下文
+     * @param properties 服务器配置属性
+     */
     public JsonRpcProtocolServer(A2AAgent<?> agent,
                                 ApplicationContext applicationContext,
                                 A2AServerProperties properties) {

@@ -25,34 +25,19 @@ a2a-server-module-complete/
 │       │       ├── RestProtocolServer.java            # REST 实现
 │       │       ├── GrpcProtocolServer.java            # gRPC 实现
 │       │       ├── JsonRpcProtocolServer.java         # JSON-RPC 实现
-│       │       ├── A2AAgentExecutorAdapter.java       # 适配器
-│       │       └── A2AGrpcServiceDelegate.java        # gRPC 委托
+│       │       └── A2AGrpcServiceDelegate.java        # gRPC 服务委托（实现 getAgentCard、sendMessage 等）
 │       ├── server/                            # 服务器管理
 │       │   ├── A2AServerBootstrap.java        # 启动器（建造者）
 │       │   └── DefaultProtocolServerFactory.java     # 默认工厂
 │       └── config/                            # SDK 配置
 │           ├── EnableA2AServer.java           # 启用注解
 │           ├── A2AServerAutoConfiguration.java        # 自动配置
-│           ├── A2AServerProperties.java              # 配置属性
-│           └── A2AServerPropertiesConfiguration.java  # 配置绑定
+│           ├── A2AServerProperties.java              # 配置属性（程序化构建）
+│           └── A2AServerPropertiesConfiguration.java  # 配置绑定（从 application.yml 读取）
 ├── src/main/resources/
 │   └── application.yml                        # 应用配置
 └── pom.xml                                    # Maven 配置
 ```
-
-## ✅ 已删除的旧代码
-
-以下旧代码已被删除，由新的 SDK 架构替代：
-
-- ❌ `agent/CompleteA2AAgentExecutor.java` - 已被 `A2AAgentExecutorAdapter` 替代
-- ❌ `config/AgentCardConfig.java` - SDK 自动管理
-- ❌ `config/ExecutorConfig.java` - SDK 自动配置
-- ❌ `config/GrpcServerConfig.java` - SDK 中有新实现
-- ❌ `config/RequestHandlerConfig.java` - SDK 不需要
-- ❌ `grpc/A2AGrpcService.java` - 已被 `A2AGrpcServiceDelegate` 替代
-- ❌ `jsonrpc/JsonRpcConfig.java` - SDK 自动配置
-- ❌ `jsonrpc/JsonRpcController.java` - 已被 `JsonRpcProtocolServer` 替代
-- ❌ `rest/A2ARestController.java` - 已被 `RestProtocolServer` 替代
 
 ## 🎯 核心设计模式
 
@@ -116,36 +101,81 @@ AbstractProtocolServer
    ↓
 2. A2AServerAutoConfiguration 自动配置
    ↓
-3. 扫描 A2AAgent 实现类
+3. A2AServerPropertiesConfiguration 绑定配置（从 application.yml）
    ↓
-4. 创建 A2AServerBootstrap
+4. 扫描 A2AAgent 实现类
    ↓
-5. 通过 ProtocolServerFactory 创建协议服务器
-   ├─→ RestProtocolServer
-   ├─→ GrpcProtocolServer
-   └─→ JsonRpcProtocolServer
+5. 创建 A2AServerBootstrap
    ↓
-6. 启动所有协议服务器
+6. 通过 ProtocolServerFactory 创建协议服务器
+   ├─→ RestProtocolServer (Spring MVC Controller)
+   ├─→ GrpcProtocolServer (gRPC Server + A2AGrpcServiceDelegate)
+   └─→ JsonRpcProtocolServer (JSON-RPC Handler)
    ↓
-7. 暴露端点
+7. 启动所有协议服务器
+   ├─→ REST: 启动 Spring MVC 端点
+   ├─→ gRPC: 启动 gRPC Server，注册 A2AGrpcServiceDelegate
+   └─→ JSON-RPC: 注册 JSON-RPC 处理器
+   ↓
+8. 暴露端点
+   ├─→ REST: /.well-known/agent-card.json, /v1/message:send
+   ├─→ gRPC: getAgentCard(), sendMessage()
+   └─→ JSON-RPC: POST /a2a
 ```
 
 ### 请求处理流程
 
+#### REST 请求处理
 ```
-客户端请求
+HTTP POST /v1/message:send
    ↓
-协议层 (REST/gRPC/JSON-RPC)
+RestProtocolServer.sendMessage()
    ↓
-A2AAgentExecutorAdapter (适配)
+提取消息内容
    ↓
 A2AAgent.execute() (用户逻辑)
    ↓
 AgentResponse (响应)
    ↓
-协议层序列化
+序列化为 JSON
    ↓
-返回给客户端
+返回 HTTP 响应
+```
+
+#### gRPC 请求处理
+```
+gRPC sendMessage() 调用
+   ↓
+A2AGrpcServiceDelegate.sendMessage()
+   ↓
+从 SendMessageRequest 提取消息（request.getRequest().getContentList()）
+   ↓
+A2AAgent.execute() (用户逻辑)
+   ↓
+AgentResponse (响应)
+   ↓
+构建 gRPC Message 对象
+   ↓
+构建 SendMessageResponse (setMsg())
+   ↓
+返回 gRPC 响应
+```
+
+#### JSON-RPC 请求处理
+```
+HTTP POST /a2a (JSON-RPC)
+   ↓
+JsonRpcProtocolServer.handle()
+   ↓
+解析 JSON-RPC 请求
+   ↓
+A2AAgent.execute() (用户逻辑)
+   ↓
+AgentResponse (响应)
+   ↓
+构建 JSON-RPC 响应
+   ↓
+返回 JSON 响应
 ```
 
 ## 🎨 核心优势
@@ -331,6 +361,99 @@ try {
 }
 ```
 
+## 🔌 gRPC 服务实现
+
+### gRPC 服务暴露机制
+
+gRPC 服务通过 `A2AGrpcServiceDelegate` 实现，继承自 `A2AServiceGrpc.A2AServiceImplBase`：
+
+```java
+public class A2AGrpcServiceDelegate extends A2AServiceGrpc.A2AServiceImplBase {
+    // 实现所有 gRPC 服务方法
+    @Override
+    public void getAgentCard(...) { ... }      // ✅ 已实现
+    @Override
+    public void sendMessage(...) { ... }       // ✅ 已实现
+    @Override
+    public void sendStreamingMessage(...) { ... } // ⏳ 待实现
+    @Override
+    public void getTask(...) { ... }           // ⏳ 待实现
+}
+```
+
+### 服务注册
+
+在 `GrpcProtocolServer.doStart()` 中注册服务：
+
+```java
+grpcServer = ServerBuilder.forPort(port)
+    .addService(grpcServiceDelegate)              // 注册 A2A 服务
+    .addService(ProtoReflectionService.newInstance()) // 启用反射服务
+    .build()
+    .start();
+```
+
+### gRPC 消息处理
+
+#### getAgentCard 实现
+```java
+@Override
+public void getAgentCard(GetAgentCardRequest request,
+                        StreamObserver<AgentCard> responseObserver) {
+    // 返回完整的 AgentCard，包含能力、技能等信息
+    responseObserver.onNext(agentCard);
+    responseObserver.onCompleted();
+}
+```
+
+#### sendMessage 实现
+```java
+@Override
+public void sendMessage(SendMessageRequest request,
+                       StreamObserver<SendMessageResponse> responseObserver) {
+    // 1. 从 request.getRequest().getContentList() 提取消息内容
+    // 2. 创建 Agent 上下文
+    // 3. 调用 A2AAgent.execute()
+    // 4. 构建 gRPC Message 对象
+    // 5. 使用 SendMessageResponse.setMsg() 返回响应
+}
+```
+
+**关键点：**
+- `SendMessageRequest` 包含 `request` (Message 类型)，需要从 `getContentList()` 提取文本
+- `SendMessageResponse` 使用 oneof 模式，通过 `setMsg()` 设置 Message 对象
+- 自动生成 taskId 和 contextId（如果请求中未提供）
+
+### 配置属性管理
+
+**两层配置架构：**
+
+1. **A2AServerPropertiesConfiguration** 
+   - 从 `application.yml` 绑定配置（`@ConfigurationProperties(prefix = "a2a.server")`）
+   - 包含 `autoStart` 等配置属性
+   - 提供 `toProperties()` 方法转换为 `A2AServerProperties`
+
+2. **A2AServerProperties**
+   - 程序化构建配置对象（**无** `@ConfigurationProperties`）
+   - 提供 Builder 模式用于程序化构建
+   - 包含协议启用状态、端口等配置
+
+**转换流程：**
+```
+application.yml
+  ↓ @ConfigurationProperties
+A2AServerPropertiesConfiguration
+  ↓ toProperties()
+A2AServerProperties
+  ↓
+A2AServerBootstrap / ProtocolServer
+```
+
+**优势：**
+- 避免配置属性重复绑定
+- 配置绑定与业务对象分离
+- 支持配置文件和程序化两种方式
+
 ## 🎯 总结
 
 新的 SDK 架构：
@@ -340,5 +463,7 @@ try {
 ✅ **易于扩展** - 添加新协议只需实现接口
 ✅ **自动化** - Spring Boot 自动配置
 ✅ **生产就绪** - 完整的错误处理和日志
+✅ **多协议支持** - REST、gRPC、JSON-RPC 全部实现
+✅ **配置清晰** - 配置绑定与属性对象分离
 
 这是一个真正**框架级别**的设计，让开发者专注于业务价值！

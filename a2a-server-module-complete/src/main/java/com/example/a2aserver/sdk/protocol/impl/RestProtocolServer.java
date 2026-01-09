@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.a2aserver.sdk.agent.A2AAgent;
 import com.example.a2aserver.sdk.config.A2AServerProperties;
@@ -38,7 +37,13 @@ public class RestProtocolServer extends AbstractProtocolServer {
 
     private final Map<String, Object> taskStore = new HashMap<>();
 
-    @Autowired(required = false)
+    /**
+     * 构造函数
+     * 
+     * @param agent Agent 实例
+     * @param applicationContext Spring 应用上下文
+     * @param properties 服务器配置属性
+     */
     public RestProtocolServer(A2AAgent<?> agent,
                              ApplicationContext applicationContext,
                              A2AServerProperties properties) {

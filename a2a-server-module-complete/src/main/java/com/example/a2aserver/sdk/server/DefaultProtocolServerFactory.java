@@ -15,18 +15,29 @@ import com.example.a2aserver.sdk.protocol.impl.RestProtocolServer;
  * 默认的协议服务器工厂
  *
  * 简化实现，直接创建协议服务器实例
+ * 
+ * 注意：REST 服务器应该通过 Spring Bean 管理，此工厂仅用于创建 gRPC 和 JSON-RPC 服务器
  */
 public class DefaultProtocolServerFactory implements ProtocolServerFactory {
 
     private final A2AServerProperties properties;
     private final ApplicationContext applicationContext;
 
-    public DefaultProtocolServerFactory() {
-        this(new A2AServerProperties(), null);
-    }
-
+    /**
+     * 构造函数
+     * 
+     * @param properties 服务器配置属性，不能为 null
+     * @param applicationContext Spring 应用上下文，不能为 null
+     * @throws IllegalArgumentException 如果 properties 或 applicationContext 为 null
+     */
     public DefaultProtocolServerFactory(A2AServerProperties properties,
                                        ApplicationContext applicationContext) {
+        if (properties == null) {
+            throw new IllegalArgumentException("Properties cannot be null");
+        }
+        if (applicationContext == null) {
+            throw new IllegalArgumentException("ApplicationContext cannot be null");
+        }
         this.properties = properties;
         this.applicationContext = applicationContext;
     }
@@ -44,6 +55,8 @@ public class DefaultProtocolServerFactory implements ProtocolServerFactory {
 
     @Override
     public boolean supports(ProtocolType protocolType) {
-        return true; // 支持所有协议类型
+        return switch (protocolType) {
+            case HTTP_REST, GRPC, JSON_RPC -> true;
+        };
     }
 }

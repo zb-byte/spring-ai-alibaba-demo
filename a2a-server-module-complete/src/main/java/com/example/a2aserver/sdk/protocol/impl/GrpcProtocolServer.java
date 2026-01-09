@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.example.a2aserver.sdk.config.A2AServerProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
 
 import com.example.a2aserver.sdk.agent.A2AAgent;
 import com.example.a2aserver.sdk.protocol.ProtocolType;
@@ -18,8 +17,9 @@ import io.a2a.grpc.AgentSkill;
 
 /**
  * gRPC 协议服务器实现
+ *
+ * 注意：此类通过工厂创建，不使用 Spring Bean 管理
  */
-@Service
 public class GrpcProtocolServer extends AbstractProtocolServer {
 
     private Server grpcServer;
