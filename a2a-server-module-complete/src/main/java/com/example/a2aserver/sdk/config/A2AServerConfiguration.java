@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * A2A server configuration class - AI Translation Bot
+ * A2A server
  */
 @Configuration
 public class A2AServerConfiguration {
@@ -25,10 +25,8 @@ public class A2AServerConfiguration {
      */
     @Bean
     public JsonRpcProtocolServer a2aServer(ObjectMapper objectMapper, ChatModel chatModel) {
-        // Create translation agent card
         AgentCard agentCard = createTranslationAgentCard();
 
-        // Create translation task handler
         TaskHandler taskHandler = createTranslationTaskHandler(chatModel);
 
         return new JsonRpcProtocolServer(agentCard, taskHandler, objectMapper);
@@ -40,7 +38,7 @@ public class A2AServerConfiguration {
     private AgentCard createTranslationAgentCard() {
         AgentProvider provider = new AgentProvider(
             "xiaopeng",
-            "https://localhost:1001"
+            "https://localhost:7003"
         );
 
         List<AgentExtension> extensions = Lists.newArrayList();
@@ -70,10 +68,10 @@ public class A2AServerConfiguration {
         return  new AgentCard.Builder()
                 .name("AI Translation Bot")
                 .description("Professional AI translation service powered by advanced language models. Supports translation between multiple languages with high accuracy and context awareness.")
-                .url("http://localhost:8080/a2a")
+                .url("http://localhost:7003/a2a")
                 .provider(provider)
                 .version( "1.0.0")
-                .documentationUrl( "http://localhost:8080/docs")
+                .documentationUrl( "http://localhost:7003/docs")
                 .capabilities(capabilities)
                 .defaultInputModes(List.of("text"))
                 .defaultOutputModes(List.of("text"))

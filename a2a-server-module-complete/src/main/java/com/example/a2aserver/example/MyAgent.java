@@ -12,10 +12,12 @@ import com.example.a2aserver.sdk.agent.A2AAgent;
 
 /**
  * 示例 Agent 实现
- *
+ * 废弃
  * 用户只需要实现 A2AAgent 接口，定义自己的业务逻辑
  * SDK 会自动处理所有协议相关的细节
+ *
  */
+@Deprecated
 @Component
 public class MyAgent implements A2AAgent<MyAgent.MyContext> {
 

@@ -13,18 +13,6 @@ spring:
           model: ${OPENAI_MODEL:deepseek-v3-250324}
           temperature: 0.7
 
-# A2A Server SDK Configuration
-a2a:
-  server:
-    auto-start: true
-    rest-enabled: true
-    rest-port: 7003
-    grpc-enabled: true
-    grpc-port: 9092
-    json-rpc-enabled: true
-    json-rpc-port: 7003
-    host: localhost
-
 # Logging
 logging:
   level:

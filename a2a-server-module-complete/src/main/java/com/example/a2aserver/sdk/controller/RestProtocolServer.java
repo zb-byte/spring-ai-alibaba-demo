@@ -23,18 +23,6 @@ public class RestProtocolServer  {
 
     private final Map<String, Object> taskStore = new HashMap<>();
     /**
-     * 获取 Agent 卡片
-     */
-    @GetMapping(value = "/.well-known/agent-card.json", produces = "application/json")
-    public Object getAgentCard() {
-        try {
-            return null;
-        } catch (Exception e) {
-            return Map.of("error", e.getMessage());
-        }
-    }
-
-    /**
      * 发送消息（同步）
      */
     @PostMapping(value = "/v1/message:send", consumes = "application/json", produces = "application/json")
