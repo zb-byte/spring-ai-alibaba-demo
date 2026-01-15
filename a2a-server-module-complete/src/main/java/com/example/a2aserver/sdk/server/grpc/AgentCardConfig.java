@@ -1,6 +1,5 @@
-package com.example.a2aserver.config;
+package com.example.a2aserver.sdk.server.grpc;
 
-import java.util.Collections;
 import java.util.List;
 
 import io.a2a.grpc.AgentCapabilities;

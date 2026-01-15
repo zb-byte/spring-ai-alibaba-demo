@@ -1,4 +1,4 @@
-package com.example.a2aserver.events;
+package com.example.a2aserver.sdk.server.grpc;
 
 import io.a2a.server.events.EventQueue;
 import io.a2a.server.events.QueueManager;

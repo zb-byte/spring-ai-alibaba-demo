@@ -22,7 +22,6 @@
         <io.a2a.sdk.version>0.3.3.Final</io.a2a.sdk.version>
         <grpc.version>1.64.0</grpc.version>
         <spring-ai.version>1.0.0-M6</spring-ai.version>
-        <spring-ai-alibaba.version>1.1.0.0-RC2</spring-ai-alibaba.version>
     </properties>
 
     <dependencies>
@@ -45,13 +44,6 @@
             <artifactId>spring-ai-alibaba-agent-framework</artifactId>
             <version>${spring-ai-alibaba.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
-            <artifactId>spring-ai-alibaba-starter-a2a-nacos</artifactId>
-            <version>${spring-ai-alibaba.version}</version>
-        </dependency>
-
         <!-- A2A SDK Core Dependencies -->
         <dependency>
             <groupId>io.github.a2asdk</groupId>

@@ -1,4 +1,4 @@
-package com.example.a2aserver.agent;
+package com.example.a2aserver.sdk.server.grpc;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;

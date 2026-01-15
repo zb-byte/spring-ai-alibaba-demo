@@ -2,9 +2,6 @@ package com.example.a2aserver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import com.example.a2aserver.sdk.config.EnableA2AServer;
-
 /**
  * Complete A2A Server Application
  *
@@ -18,7 +15,6 @@ import com.example.a2aserver.sdk.config.EnableA2AServer;
  * @author A2A Team
  */
 @SpringBootApplication
-@EnableA2AServer
 public class CompleteA2AServerApplication {
 
     public static void main(String[] args) {
