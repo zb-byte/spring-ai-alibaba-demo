@@ -21,7 +21,6 @@ import com.example.a2aserver.sdk.protocol.impl.RestProtocolServer;
 public class DefaultProtocolServerFactory implements ProtocolServerFactory {
 
     private final A2AServerProperties properties;
-    private final ApplicationContext applicationContext;
 
     /**
      * 构造函数
@@ -39,18 +38,13 @@ public class DefaultProtocolServerFactory implements ProtocolServerFactory {
             throw new IllegalArgumentException("ApplicationContext cannot be null");
         }
         this.properties = properties;
-        this.applicationContext = applicationContext;
     }
 
     @Override
     public ProtocolServer createServer(ProtocolType protocolType,
                                       A2AAgent<?> agent,
                                       ApplicationContext applicationContext) {
-        return switch (protocolType) {
-            case HTTP_REST -> new RestProtocolServer(agent, applicationContext, properties);
-            case GRPC -> new GrpcProtocolServer(agent, applicationContext, properties);
-            case JSON_RPC -> new JsonRpcProtocolServer(agent, applicationContext, properties);
-        };
+        return new GrpcProtocolServer(agent, applicationContext, properties);
     }
 
     @Override

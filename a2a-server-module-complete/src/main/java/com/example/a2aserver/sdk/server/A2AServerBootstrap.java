@@ -1,9 +1,6 @@
 package com.example.a2aserver.sdk.server;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.example.a2aserver.sdk.protocol.ProtocolServerFactory;
 import com.example.a2aserver.sdk.protocol.ServerCreationStrategy;
@@ -93,38 +90,14 @@ public class A2AServerBootstrap {
      * @return 协议服务器实例
      */
     private ProtocolServer createOrGetServer(ProtocolType protocolType, ProtocolServerFactory factory) {
-        if (protocolType.getCreationStrategy() == ServerCreationStrategy.SPRING_BEAN) {
-            // 从 Spring 容器获取 Bean
-            try {
-                return switch (protocolType) {
-                    case HTTP_REST -> applicationContext.getBean(RestProtocolServer.class);
-                    default -> factory.createServer(protocolType, agent, applicationContext);
-                };
-            } catch (Exception e) {
-                logger.warn("Failed to get {} server from Spring container, falling back to factory creation", 
-                        protocolType.getCode(), e);
-                // 如果获取失败，回退到工厂创建
-                return factory.createServer(protocolType, agent, applicationContext);
-            }
-        } else {
-            // 通过工厂创建，但先尝试从 Spring 容器获取（如果已注册为 Bean）
-            // 这适用于 JSON-RPC 等需要 REST 端点的服务器
-            try {
-                return switch (protocolType) {
-                    case JSON_RPC -> {
-                        try {
-                            yield applicationContext.getBean(JsonRpcProtocolServer.class);
-                        } catch (Exception ex) {
-                            logger.debug("JsonRpcProtocolServer not found in Spring container, creating via factory");
-                            yield factory.createServer(protocolType, agent, applicationContext);
-                        }
-                    }
-                    default -> factory.createServer(protocolType, agent, applicationContext);
-                };
-            } catch (Exception e) {
-                // 如果获取失败，通过工厂创建
-                return factory.createServer(protocolType, agent, applicationContext);
-            }
+        if (protocolType.equals(ProtocolType.HTTP_REST)) {
+            return applicationContext.getBean(RestProtocolServer.class);
+        }
+        else if (protocolType.equals(ProtocolType.JSON_RPC)) {
+            return applicationContext.getBean(JsonRpcProtocolServer.class);
+        }
+        else {
+            return  factory.createServer(protocolType, agent, applicationContext);
         }
     }
 
@@ -166,7 +139,7 @@ public class A2AServerBootstrap {
     public static class Builder {
         private A2AAgent<?> agent;
         private ApplicationContext applicationContext;
-        private Set<ProtocolType> enabledProtocols = EnumSet.allOf(ProtocolType.class);
+        private Set<ProtocolType> enabledProtocols = new HashSet<>(Collections.singleton(ProtocolType.JSON_RPC));
         private A2AServerProperties properties = new A2AServerProperties();
         private ProtocolServerFactory factory;
 

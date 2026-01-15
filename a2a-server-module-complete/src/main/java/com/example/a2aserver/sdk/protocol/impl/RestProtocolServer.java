@@ -32,7 +32,7 @@ import io.a2a.spec.AgentSkill;
  * 直接实现 REST 端点，不依赖 A2A SDK 的 RequestHandler
  */
 @RestController
-@RequestMapping
+@RequestMapping("/rest")
 public class RestProtocolServer extends AbstractProtocolServer {
 
     private final Map<String, Object> taskStore = new HashMap<>();
@@ -99,15 +99,7 @@ public class RestProtocolServer extends AbstractProtocolServer {
     @GetMapping(value = "/.well-known/agent-card.json", produces = "application/json")
     public Object getAgentCard() {
         try {
-            Map<String, Object> card = new HashMap<>();
-            card.put("name", agent.getName() + " (REST)");
-            card.put("description", agent.getDescription());
-            card.put("version", agent.getVersion());
-            card.put("url", getServerUrl());
-            card.put("capabilities", Map.of(
-                "streaming", agent.supportsStreaming()
-            ));
-            return card;
+            return buildAgentCard();
         } catch (Exception e) {
             logger.error("Error getting agent card", e);
             return Map.of("error", e.getMessage());
@@ -123,8 +115,8 @@ public class RestProtocolServer extends AbstractProtocolServer {
             String taskId = UUID.randomUUID().toString();
             String message = extractMessage(request);
 
-            // 创建上下文
-            A2AAgent.AgentContext context = createContext(taskId);
+            // 使用 agent 的 createContext 方法来创建正确的上下文类型
+            A2AAgent.AgentContext context = (A2AAgent.AgentContext) agent.createContext(Map.of("taskId", taskId));
 
             // 执行 Agent - 显式转换以避免泛型推断问题
             @SuppressWarnings("unchecked")
@@ -200,26 +192,5 @@ public class RestProtocolServer extends AbstractProtocolServer {
             }
         }
         return request.toString();
-    }
-
-    private A2AAgent.AgentContext createContext(String taskId) {
-        return new A2AAgent.AgentContext() {
-            private final Map<String, Object> attributes = new HashMap<>();
-
-            @Override
-            public String getTaskId() {
-                return taskId;
-            }
-
-            @Override
-            public String getContextId() {
-                return UUID.randomUUID().toString();
-            }
-
-            @Override
-            public Map<String, Object> getAttributes() {
-                return attributes;
-            }
-        };
     }
 }

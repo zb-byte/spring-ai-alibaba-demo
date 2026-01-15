@@ -6,10 +6,7 @@ import java.util.UUID;
 
 import io.a2a.spec.*;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.a2aserver.sdk.agent.A2AAgent;
 import com.example.a2aserver.sdk.config.A2AServerProperties;
@@ -25,7 +22,7 @@ import java.util.List;
  * 注意：此类通过工厂创建，但需要手动注册为 Spring Bean 以便 REST 端点生效
  */
 @RestController
-@RequestMapping("/a2a")
+@RequestMapping
 public class JsonRpcProtocolServer extends AbstractProtocolServer {
 
     /**
@@ -49,10 +46,10 @@ public class JsonRpcProtocolServer extends AbstractProtocolServer {
 
     @Override
     protected AgentCard buildAgentCard() {
-        String serverUrl = getServerUrl() + "/a2a";
-        
+        String serverUrl = getServerUrl() + "/v1/message/send";
+        System.out.println("JsonRpcProtocolServer serverUrl: " + serverUrl);
         return new AgentCard.Builder()
-                .name(agent.getName() + " (JSON-RPC)")
+                .name(agent.getName())
                 .description(agent.getDescription())
                 .url(serverUrl)
                 .version(agent.getVersion())
@@ -67,10 +64,10 @@ public class JsonRpcProtocolServer extends AbstractProtocolServer {
                 .skills(List.of(
                         new AgentSkill.Builder()
                                 .id("chat")
-                                .name("Chat")
-                                .description("Chat with the agent via JSON-RPC")
+                                .name("推荐菜品")
+                                .description("根据客人口味推荐菜品")
                                 .tags(List.of("chat", "json-rpc"))
-                                .examples(List.of("Hello", "What can you do?", "Help me with a task"))
+                                .examples(List.of("推荐一个菜"))
                                 .build()
                 ))
                 .preferredTransport("JSONRPC")
@@ -90,16 +87,28 @@ public class JsonRpcProtocolServer extends AbstractProtocolServer {
     protected void doStop() throws Exception {
         // JSON-RPC 由 Spring 管理
     }
-
+    /**
+     * 获取 Agent 卡片
+     */
+    @GetMapping(value = "/.well-known/agent-card.json", produces = "application/json")
+    public Object getAgentCard() {
+        try {
+            return buildAgentCard();
+        } catch (Exception e) {
+            logger.error("Error getting agent card", e);
+            return Map.of("error", e.getMessage());
+        }
+    }
     /**
      * 处理 JSON-RPC 请求
      */
-    @PostMapping
+    @PostMapping(value = "/v1/message/send", consumes = "application/json", produces = "application/json")
     public Object handleJsonRpcRequest(@RequestBody String request) {
         try {
             // 简单的 JSON-RPC 处理
             String taskId = UUID.randomUUID().toString();
-            A2AAgent.AgentContext context = createContext(taskId);
+            // 使用 agent 的 createContext 方法来创建正确的上下文类型
+            A2AAgent.AgentContext context = (A2AAgent.AgentContext) agent.createContext(Map.of("taskId", taskId));
 
             // 直接使用请求作为输入 - 显式转换以避免泛型推断问题
             @SuppressWarnings("unchecked")
@@ -124,26 +133,5 @@ public class JsonRpcProtocolServer extends AbstractProtocolServer {
                 "id", null
             );
         }
-    }
-
-    private A2AAgent.AgentContext createContext(String taskId) {
-        return new A2AAgent.AgentContext() {
-            private final Map<String, Object> attributes = new HashMap<>();
-
-            @Override
-            public String getTaskId() {
-                return taskId;
-            }
-
-            @Override
-            public String getContextId() {
-                return UUID.randomUUID().toString();
-            }
-
-            @Override
-            public Map<String, Object> getAttributes() {
-                return attributes;
-            }
-        };
     }
 }

@@ -27,7 +27,7 @@ public class MyAgent implements A2AAgent<MyAgent.MyContext> {
         this.chatClient = ChatClient.builder(chatModel)
                 .defaultSystem("""
                     你是一个友好的 AI 助手，名字叫 Demo Agent。
-                    你支持 REST、gRPC 和 JSON-RPC 三种协议。
+                    你会根据用户的喜好推荐中国的八大菜系中的菜品。
                     你会用简洁、有帮助的方式回答用户的问题。
                     """)
                 .build();
@@ -35,12 +35,12 @@ public class MyAgent implements A2AAgent<MyAgent.MyContext> {
 
     @Override
     public String getName() {
-        return "Demo Agent";
+        return "推荐菜品agent";
     }
 
     @Override
     public String getDescription() {
-        return "一个支持多协议的示例 A2A Agent";
+        return "一个根据用户的喜好推荐中国的八大菜系中的菜品的agent";
     }
 
     @Override
@@ -55,7 +55,7 @@ public class MyAgent implements A2AAgent<MyAgent.MyContext> {
 
     @Override
     public AgentResponse execute(String input, MyContext context) {
-        logger.info("Executing agent with input: {}", input);
+        logger.info("MyAgent Executing agent with input: {}", input);
 
         try {
             // 调用 LLM
@@ -64,7 +64,7 @@ public class MyAgent implements A2AAgent<MyAgent.MyContext> {
                     .call()
                     .content();
 
-            logger.info("Agent response: {}", response);
+            logger.info("MyAgent Agent response: {}", response);
 
             // 返回响应
             return AgentResponse.builder()
@@ -77,7 +77,7 @@ public class MyAgent implements A2AAgent<MyAgent.MyContext> {
                     .build();
 
         } catch (Exception e) {
-            logger.error("Error executing agent", e);
+            logger.error("s Error executing agent", e);
 
             // 返回错误响应
             return AgentResponse.builder()

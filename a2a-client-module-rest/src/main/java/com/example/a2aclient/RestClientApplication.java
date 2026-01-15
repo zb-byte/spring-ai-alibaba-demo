@@ -32,18 +32,8 @@ public class RestClientApplication {
             
             // 测试发送同步消息
             logger.info("\n[Test 2] Sending Synchronous Message...");
-            restDemo.sendMessage("你好，请介绍一下你自己");
+            restDemo.sendMessage("推荐一个菜");
             Thread.sleep(500);
-            
-            // 测试发送流式消息
-            logger.info("\n[Test 3] Sending Streaming Message...");
-            logger.info("Streaming response (real-time):");
-            restDemo.sendMessageStreamingForConsole("请写一首关于春天的诗");
-            Thread.sleep(500);
-            
-            logger.info("\n=========================================");
-            logger.info("All tests completed!");
-            logger.info("=========================================");
             
         } catch (InterruptedException e) {
             logger.error("Test interrupted", e);

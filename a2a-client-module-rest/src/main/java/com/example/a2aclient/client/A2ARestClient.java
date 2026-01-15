@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import io.a2a.client.transport.jsonrpc.JSONRPCTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,11 +35,12 @@ public class A2ARestClient {
 
     private static final Logger logger = LoggerFactory.getLogger(A2ARestClient.class);
 
-    @Value("${a2a.server.url:http://localhost:7002}")
+    @Value("${a2a.server.url:http://localhost:7003/v1}")
     private String serverUrl;
 
     private AgentCard agentCard;
     private RestTransport transport;
+    private JSONRPCTransport jsonrpcTransport;
 
     @PostConstruct
     public void init() {
@@ -53,6 +55,7 @@ public class A2ARestClient {
         A2ACardResolver resolver = new A2ACardResolver(serverUrl);
         this.agentCard = resolver.getAgentCard();
         this.transport = new RestTransport(agentCard);
+        this.jsonrpcTransport = new JSONRPCTransport(agentCard);
         logger.info("Agent card fetched: {}", agentCard.name());
         return agentCard;
     }
@@ -75,7 +78,7 @@ public class A2ARestClient {
 
             MessageSendParams params = new MessageSendParams(message, null, null);
 
-            EventKind result = transport.sendMessage(params, null);
+            EventKind result = jsonrpcTransport.sendMessage(params, null);
             logger.info("Message sent, result type: {}", result.getClass().getSimpleName());
             return result;
         }

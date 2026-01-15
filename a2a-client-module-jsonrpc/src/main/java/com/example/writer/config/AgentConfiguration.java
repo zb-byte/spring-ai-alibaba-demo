@@ -14,7 +14,7 @@ import com.alibaba.cloud.ai.graph.exception.GraphStateException;
 @Configuration
 public class AgentConfiguration {
 
-    @Value("${reviewer.agent.url:http://127.0.0.1:8081}")
+    @Value("${reviewer.agent.url:http://localhost:7003/a2a}")
     private String reviewerAgentUrl;
 
     /**
@@ -23,7 +23,7 @@ public class AgentConfiguration {
      */
     @Bean
     public AgentCardProvider reviewerAgentCardProvider() {
-        String wellKnownUrl = reviewerAgentUrl + "/.well-known/agent.json";
+        String wellKnownUrl = "http://localhost:7003/a2a";
         return RemoteAgentCardProvider.newProvider(wellKnownUrl);
     }
 

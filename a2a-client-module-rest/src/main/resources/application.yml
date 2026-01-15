@@ -8,7 +8,7 @@ spring:
 # A2A Server Configuration
 a2a:
   server:
-    url: http://localhost:7002
+    url: http://localhost:7003/a2a
 
 logging:
   level:
